@@ -1,0 +1,176 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+using System;
+
+namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
+{
+
+<#
+
+for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
+{
+    var argNames = 
+        Enumerable
+        .Range(1, argumentCount)
+        .Select(x => GetTypeArgumentName(x))
+        .ToArray();
+#>  
+    public abstract class Union <#= 
+    // Generic parameters
+    "<" + 
+    argNames
+    .Aggregate((aggr, cur) => aggr + ", " + cur) + ">" #>
+<# 
+    // Generic contraints
+    foreach (var n in argNames)
+    {
+#>
+        where <#= n #> : Case
+<#  } #>
+    {
+<#
+    // Class fileds
+    for (var i = 1; i <= argNames.Length; i += 1)
+    {
+#>
+        CaseSelection<#= "<" + argNames[i - 1] + ">" #> case<#= i #>;
+<#
+    }
+#>
+        
+<#
+    // Constructors
+    foreach (var n in argNames)
+    {
+#>
+        public Union(<#= n #> @case)
+        {
+            set(@case);
+        }
+<#
+    }
+#>
+        
+<#
+    // Set methods
+    for (var i = 1; i <= argNames.Length; i += 1)
+    {
+#>
+        private void set(<#= argNames[i - 1] #> @case)
+        {
+        <#
+            for (var j = 1; j <= argNames.Length; j += 1)
+            {
+        #>    this.case<#= j #> = <#= 
+                i == j ?
+                "new SelectedCase<" + argNames[j - 1] + ">(@case);" :
+                "new UnselectedCase<" + argNames[j - 1] + ">();"
+            #>
+        <#
+            }
+        #>
+            
+        }
+<#
+    }
+#>
+
+<#
+    // When methods
+    for (var i = 1; i <= argNames.Length; i += 1)
+    {
+#>
+        public void When(Action<#= "<" + argNames[i - 1] + ">" #> action)
+        {
+            this.case<#= i #>.Do(action);
+        }
+<#
+    }
+#>
+
+<#
+    // Switch methods
+    var permutatedSwtichLimit = 5;
+    
+	// When the number of type arguments is less then the limit, create all switch permutations
+    if (argumentCount <= permutatedSwtichLimit)
+    {
+        var argNamesSlice = argNames.Take(permutatedSwtichLimit).Select((x, i) => new { str = x, i = i + 1 });
+        var argNamesPermutations = GetPermutations(argNamesSlice, argNamesSlice.Count());
+
+    
+        foreach (var p in argNamesPermutations)
+        {
+#>
+        
+        public void Switch(<#= 
+            p
+            .Select(x => "Action<" + x.str + "> action" + x.i)
+            .Aggregate((aggr, cur) => aggr + ", " + cur)
+        #>)
+        {
+        <# for (var i = 1; i <= argNames.Length; i += 1)
+           {
+        #>    this.case<#= i #>.Do(action<#= i #>);
+        <#
+           }
+        #>}
+<#
+        }
+    } // if (argumentCount <= permutatedSwtichLimit)
+
+	// When the number of type arguments is more then the limit, create only one overload
+    else
+    {
+        #>
+        public void Switch(<#= 
+            argNames
+            .Select((x, i) => new { str = x, i = i + 1 })
+            .Select(x => "Action<" + x.str + "> action" + x.i)
+            .Aggregate((aggr, cur) => aggr + ", " + cur)
+        #>)
+        { 
+		<#
+        for (var i = 1; i <= argNames.Length; i += 1)
+        {
+        #>    this.case<#= i #>.Do(action<#= i #>);
+        <#
+        }
+        #>}
+<#
+    } // else
+
+
+#>    }
+<#
+}
+#>
+}
+
+<#+
+
+private string GetTypeArgumentName(int i)
+{
+    return "T" + i.ToString();
+}
+
+private string GetTypeArgumentName(string i)
+{
+    return "T" + i;
+}
+
+static IEnumerable<IEnumerable<T>>
+            GetPermutations<T>(IEnumerable<T> list, int length)
+{
+    if (length == 1) return list.Select(t => new T[] { t });
+
+    return GetPermutations(list, length - 1)
+        .SelectMany(t => list.Where(e => !t.Contains(e)),
+            (t1, t2) => t1.Concat(new T[] { t2 }));
+}
+
+#>
