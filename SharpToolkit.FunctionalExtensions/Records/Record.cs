@@ -1,6 +1,8 @@
 ﻿using SharpToolkit.FunctionalExtensions.Records;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace SharpToolkit.FunctionalExtensions
@@ -13,7 +15,7 @@ namespace SharpToolkit.FunctionalExtensions
 
     }
 
-    public abstract class Record<T> : IRecord, IEqualityComparer<T>
+    public abstract class Record<T> : IRecord, IEquatable<T>
         where T : Record<T>
     {
         private readonly TypeUtils<T> utils;
@@ -23,25 +25,45 @@ namespace SharpToolkit.FunctionalExtensions
             utils = TypeUtils<T>.Instance;
         }
 
-        public virtual bool Equals(T x, T y)
+        public virtual Result Validate()
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
-                return false;
+            return new Result.Ok();
+        }
 
-            return utils.EqualsFn(x, y);
+        public static Result<T> Valid(T record)
+        {
+            return
+                record
+                .Validate()
+                .Match<Result<T>>(
+                    (Result.Ok x) => new Result<T>.Ok(record),
+                    (Result.Error x) => new Result<T>.Error(x.Value));
+        }
+
+        public T Copy(Func<RecordMemberCopy<T>, RecordMemberCopy<T>> alterationsFn)
+        {
+            var r = utils.CopyFn((T)this);
+
+            var alterations = alterationsFn(new RecordMemberCopy<T>());
+
+            foreach (var (member, val) in alterations)
+                this.utils.SetMemberFnMap[member](r, val(r));
+
+
+            return r;
         }
 
         public override bool Equals(object obj)
         {
             if (obj is T o)
-                return this.Equals((T)this, o);
+                return this.Equals(o);
 
             return false;
         }
 
-        public int GetHashCode(T obj)
+        public bool Equals(T other)
         {
-            throw new NotImplementedException();
+            return utils.EqualsFn((T)this, other);
         }
 
         public override int GetHashCode()
@@ -49,11 +71,16 @@ namespace SharpToolkit.FunctionalExtensions
             return this.utils.GetHashCodeFn((T)this);
         }
 
+        public int GetHashCode(T obj)
+        {
+            return obj.GetHashCode();
+        }
+
         public static bool operator ==(Record<T> x, Record<T> y) =>
-            x.Equals((T)x, (T)y);
+            x.Equals((T)y);
 
         public static bool operator !=(Record<T> x, Record<T> y) =>
-            !x.Equals((T)x, (T)y);
+            !x.Equals((T)y);
 
         public override string ToString()
         {
@@ -65,7 +92,10 @@ namespace SharpToolkit.FunctionalExtensions
             return this.utils.ToStringFn((T)this, indent);
         }
 
+
+#pragma warning disable IDE1006 // For VS debugging
         private string DebugView
+#pragma warning restore IDE1006
         {
             get
             {

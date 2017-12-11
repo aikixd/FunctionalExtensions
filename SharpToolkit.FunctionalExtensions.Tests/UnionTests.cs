@@ -10,23 +10,33 @@ namespace SharpToolkit.FunctionalExtensions.Tests
     [TestClass]
     public class UnionTests
     {
-        class Option<T> : Union<Option<T>.Some, Option<T>.None>
+        public class Email { }
+        public class Phone { }
+
+        public class ContactInfo : Union<ContactInfo.Email, ContactInfo.Phone>
         {
-            public Option(Some @case) : base(@case)
+            public ContactInfo(Email @case) : base(@case)
             {
             }
 
-            public Option(None @case) : base(@case)
+            public ContactInfo(Phone @case) : base(@case)
             {
             }
 
-            public class None : Case<Option<T>> { }
-            public class Some : Case<Option<T>, T>
+            public class Email : Case<ContactInfo, UnionTests.Email>
             {
-                public Some(T value) : base(value)
+                public Email(UnionTests.Email value) : base(value)
                 {
                 }
             }
+
+            public class Phone : Case<ContactInfo, UnionTests.Phone>
+            {
+                public Phone(UnionTests.Phone value) : base(value)
+                {
+                }
+            }
+
         }
 
         [TestMethod]
@@ -41,6 +51,22 @@ namespace SharpToolkit.FunctionalExtensions.Tests
             Assert.AreNotSame(a, b);
 
             Debugger.Break();
+        }
+
+        [TestMethod]
+        public void Union_Return()
+        {
+            Option<int> someNum = new Option<int>.Some(5);
+
+            var r = someNum.Match(
+                some => true,
+                none => false);
+
+            ContactInfo ci = new ContactInfo.Email(new Email());
+
+            var o = ci.Match(email => (object)email.Value, phone => phone.Value);
+
+            Assert.IsInstanceOfType(o, typeof(Email));
         }
     }
 }

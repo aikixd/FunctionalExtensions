@@ -5,8 +5,9 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
 using System;
+using SharpToolkit.FunctionalExtensions.DiscriminatedUnions;
 
-namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
+namespace SharpToolkit.FunctionalExtensions
 {
 
 <#
@@ -32,6 +33,7 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
         where <#= n #> : Case
 <#  } #>
     {
+    
 <#
     // Class fileds
     for (var i = 1; i <= argNames.Length; i += 1)
@@ -86,7 +88,14 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
 #>
         public void When(Action<#= "<" + argNames[i - 1] + ">" #> action)
         {
-            this.case<#= i #>.Do(action);
+            this.case<#= i #>.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<#= "<" + argNames[i - 1] + ", TResult>" #> fn)
+        {
+            this.case<#= i #>.Do(fn, out var r);
+
+            return r;
         }
 <#
     }
@@ -94,7 +103,7 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
 
 <#
     // Switch methods
-    var permutatedSwtichLimit = 5;
+    var permutatedSwtichLimit = 0;
     
 	// When the number of type arguments is less then the limit, create all switch permutations
     if (argumentCount <= permutatedSwtichLimit)
@@ -106,19 +115,38 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
         foreach (var p in argNamesPermutations)
         {
 #>
+        public TResult Match<TResult>(<#= 
+            p
+            .Select(x => "Func<" + x.str + ", TResult> fn" + x.i)
+            .Aggregate((aggr, cur) => aggr + ", " + cur)
+        #>)
+        {
+            TResult r = default;  
+        <# for (var i = 1; i <= argNames.Length; i += 1)
+           {
+        #>              
+            if (this.case<#= i #>.Do(fn<#= i #>, out r)) return r;            
+        <#
+           }
+        #> 
+            throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
+        }
         
-        public void Switch(<#= 
+        public void Match(<#= 
             p
             .Select(x => "Action<" + x.str + "> action" + x.i)
             .Aggregate((aggr, cur) => aggr + ", " + cur)
         #>)
         {
+            int r = default;
         <# for (var i = 1; i <= argNames.Length; i += 1)
            {
-        #>    this.case<#= i #>.Do(action<#= i #>);
+        #>    this.case<#= i #>.Do(action<#= i #>.AsFunc(), out r);
         <#
            }
         #>}
+
+        
 <#
         }
     } // if (argumentCount <= permutatedSwtichLimit)
@@ -127,20 +155,39 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
     else
     {
         #>
-        public void Switch(<#= 
+        public void Match(<#= 
             argNames
             .Select((x, i) => new { str = x, i = i + 1 })
             .Select(x => "Action<" + x.str + "> action" + x.i)
             .Aggregate((aggr, cur) => aggr + ", " + cur)
         #>)
         { 
+            int r = default;
 		<#
         for (var i = 1; i <= argNames.Length; i += 1)
         {
-        #>    this.case<#= i #>.Do(action<#= i #>);
+        #>    this.case<#= i #>.Do(action<#= i #>.AsFunc(), out r);
         <#
         }
         #>}
+
+        public TResult Match<TResult>(<#= 
+            argNames
+            .Select((x, i) => new { str = x, i = i + 1 })
+            .Select(x => "Func<" + x.str + ", TResult> fn" + x.i)
+            .Aggregate((aggr, cur) => aggr + ", " + cur)
+        #>)
+        {  
+            TResult r = default;
+		<#
+        for (var i = 1; i <= argNames.Length; i += 1)
+        {
+        #>    if (this.case<#= i #>.Do(fn<#= i #>, out r)) return r;
+        <#
+        }
+        #> 
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
+        }
 <#
     } // else
 
@@ -149,6 +196,8 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
 <#
 }
 #>
+
+
 }
 
 <#+
@@ -174,3 +223,4 @@ static IEnumerable<IEnumerable<T>>
 }
 
 #>
+

@@ -1,12 +1,14 @@
 ﻿using System;
+using SharpToolkit.FunctionalExtensions.DiscriminatedUnions;
 
-namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
+namespace SharpToolkit.FunctionalExtensions
 {
 
   
     public abstract class Union <T1>
         where T1 : Case
     {
+    
         CaseSelection<T1> case1;
         
         public Union(T1 @case)
@@ -22,13 +24,28 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
 
         public void When(Action<T1> action)
         {
-            this.case1.Do(action);
+            this.case1.Do(action.AsFunc(), out var r);
         }
 
-        
-        public void Switch(Action<T1> action1)
+        public TResult When<TResult>(Func<T1, TResult> fn)
         {
-            this.case1.Do(action1);
+            this.case1.Do(fn, out var r);
+
+            return r;
+        }
+
+        public void Match(Action<T1> action1)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+        }
+
+        public TResult Match<TResult>(Func<T1, TResult> fn1)
+        {  
+            TResult r = default;
+		    if (this.case1.Do(fn1, out r)) return r;
+         
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
     }
   
@@ -36,6 +53,7 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
         where T1 : Case
         where T2 : Case
     {
+    
         CaseSelection<T1> case1;
         CaseSelection<T2> case2;
         
@@ -63,24 +81,41 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
 
         public void When(Action<T1> action)
         {
-            this.case1.Do(action);
+            this.case1.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T1, TResult> fn)
+        {
+            this.case1.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T2> action)
         {
-            this.case2.Do(action);
+            this.case2.Do(action.AsFunc(), out var r);
         }
 
-        
-        public void Switch(Action<T1> action1, Action<T2> action2)
+        public TResult When<TResult>(Func<T2, TResult> fn)
         {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
+            this.case2.Do(fn, out var r);
+
+            return r;
         }
-        
-        public void Switch(Action<T2> action2, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
+
+        public void Match(Action<T1> action1, Action<T2> action2)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+        }
+
+        public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2)
+        {  
+            TResult r = default;
+		    if (this.case1.Do(fn1, out r)) return r;
+            if (this.case2.Do(fn2, out r)) return r;
+         
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
     }
   
@@ -89,6 +124,7 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
         where T2 : Case
         where T3 : Case
     {
+    
         CaseSelection<T1> case1;
         CaseSelection<T2> case2;
         CaseSelection<T3> case3;
@@ -130,58 +166,54 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
 
         public void When(Action<T1> action)
         {
-            this.case1.Do(action);
+            this.case1.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T1, TResult> fn)
+        {
+            this.case1.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T2> action)
         {
-            this.case2.Do(action);
+            this.case2.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T2, TResult> fn)
+        {
+            this.case2.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T3> action)
         {
-            this.case3.Do(action);
+            this.case3.Do(action.AsFunc(), out var r);
         }
 
-        
-        public void Switch(Action<T1> action1, Action<T2> action2, Action<T3> action3)
+        public TResult When<TResult>(Func<T3, TResult> fn)
         {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
+            this.case3.Do(fn, out var r);
+
+            return r;
         }
-        
-        public void Switch(Action<T1> action1, Action<T3> action3, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
+
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+            this.case3.Do(action3.AsFunc(), out r);
         }
-        
-        public void Switch(Action<T2> action2, Action<T1> action1, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T3> action3, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T1> action1, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T2> action2, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
+
+        public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3)
+        {  
+            TResult r = default;
+		    if (this.case1.Do(fn1, out r)) return r;
+            if (this.case2.Do(fn2, out r)) return r;
+            if (this.case3.Do(fn3, out r)) return r;
+         
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
     }
   
@@ -191,6 +223,7 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
         where T3 : Case
         where T4 : Case
     {
+    
         CaseSelection<T1> case1;
         CaseSelection<T2> case2;
         CaseSelection<T3> case3;
@@ -248,212 +281,67 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
 
         public void When(Action<T1> action)
         {
-            this.case1.Do(action);
+            this.case1.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T1, TResult> fn)
+        {
+            this.case1.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T2> action)
         {
-            this.case2.Do(action);
+            this.case2.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T2, TResult> fn)
+        {
+            this.case2.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T3> action)
         {
-            this.case3.Do(action);
+            this.case3.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn)
+        {
+            this.case3.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T4> action)
         {
-            this.case4.Do(action);
+            this.case4.Do(action.AsFunc(), out var r);
         }
 
-        
-        public void Switch(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4)
+        public TResult When<TResult>(Func<T4, TResult> fn)
         {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
+            this.case4.Do(fn, out var r);
+
+            return r;
         }
-        
-        public void Switch(Action<T1> action1, Action<T2> action2, Action<T4> action4, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
+
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+            this.case3.Do(action3.AsFunc(), out r);
+            this.case4.Do(action4.AsFunc(), out r);
         }
-        
-        public void Switch(Action<T1> action1, Action<T3> action3, Action<T2> action2, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T3> action3, Action<T4> action4, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T4> action4, Action<T2> action2, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T4> action4, Action<T3> action3, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T1> action1, Action<T3> action3, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T1> action1, Action<T4> action4, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T3> action3, Action<T1> action1, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T4> action4, Action<T1> action1, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T4> action4, Action<T3> action3, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T1> action1, Action<T2> action2, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T1> action1, Action<T4> action4, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T2> action2, Action<T1> action1, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T2> action2, Action<T4> action4, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T4> action4, Action<T1> action1, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T4> action4, Action<T2> action2, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T1> action1, Action<T2> action2, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T1> action1, Action<T3> action3, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T2> action2, Action<T1> action1, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T2> action2, Action<T3> action3, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T3> action3, Action<T1> action1, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T3> action3, Action<T2> action2, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
+
+        public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4)
+        {  
+            TResult r = default;
+		    if (this.case1.Do(fn1, out r)) return r;
+            if (this.case2.Do(fn2, out r)) return r;
+            if (this.case3.Do(fn3, out r)) return r;
+            if (this.case4.Do(fn4, out r)) return r;
+         
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
     }
   
@@ -464,6 +352,7 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
         where T4 : Case
         where T5 : Case
     {
+    
         CaseSelection<T1> case1;
         CaseSelection<T2> case2;
         CaseSelection<T3> case3;
@@ -539,1104 +428,80 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
 
         public void When(Action<T1> action)
         {
-            this.case1.Do(action);
+            this.case1.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T1, TResult> fn)
+        {
+            this.case1.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T2> action)
         {
-            this.case2.Do(action);
+            this.case2.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T2, TResult> fn)
+        {
+            this.case2.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T3> action)
         {
-            this.case3.Do(action);
+            this.case3.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn)
+        {
+            this.case3.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T4> action)
         {
-            this.case4.Do(action);
+            this.case4.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T4, TResult> fn)
+        {
+            this.case4.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T5> action)
         {
-            this.case5.Do(action);
+            this.case5.Do(action.AsFunc(), out var r);
         }
 
-        
-        public void Switch(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T5> action5, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T2> action2, Action<T4> action4, Action<T3> action3, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T2> action2, Action<T4> action4, Action<T5> action5, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T2> action2, Action<T5> action5, Action<T3> action3, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T2> action2, Action<T5> action5, Action<T4> action4, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T3> action3, Action<T2> action2, Action<T4> action4, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T3> action3, Action<T2> action2, Action<T5> action5, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T3> action3, Action<T4> action4, Action<T2> action2, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T3> action3, Action<T5> action5, Action<T2> action2, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T3> action3, Action<T5> action5, Action<T4> action4, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T4> action4, Action<T2> action2, Action<T3> action3, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T4> action4, Action<T2> action2, Action<T5> action5, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T4> action4, Action<T3> action3, Action<T2> action2, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T4> action4, Action<T3> action3, Action<T5> action5, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T4> action4, Action<T5> action5, Action<T2> action2, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T4> action4, Action<T5> action5, Action<T3> action3, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T5> action5, Action<T2> action2, Action<T3> action3, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T5> action5, Action<T2> action2, Action<T4> action4, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T5> action5, Action<T3> action3, Action<T2> action2, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T5> action5, Action<T3> action3, Action<T4> action4, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T5> action5, Action<T4> action4, Action<T2> action2, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T1> action1, Action<T5> action5, Action<T4> action4, Action<T3> action3, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T1> action1, Action<T3> action3, Action<T4> action4, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T1> action1, Action<T3> action3, Action<T5> action5, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T1> action1, Action<T4> action4, Action<T3> action3, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T1> action1, Action<T4> action4, Action<T5> action5, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T1> action1, Action<T5> action5, Action<T3> action3, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T1> action1, Action<T5> action5, Action<T4> action4, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T3> action3, Action<T1> action1, Action<T4> action4, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T3> action3, Action<T1> action1, Action<T5> action5, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T1> action1, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T3> action3, Action<T5> action5, Action<T1> action1, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T3> action3, Action<T5> action5, Action<T4> action4, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T4> action4, Action<T1> action1, Action<T3> action3, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T4> action4, Action<T1> action1, Action<T5> action5, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T4> action4, Action<T3> action3, Action<T1> action1, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T4> action4, Action<T3> action3, Action<T5> action5, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T4> action4, Action<T5> action5, Action<T1> action1, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T4> action4, Action<T5> action5, Action<T3> action3, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T5> action5, Action<T1> action1, Action<T3> action3, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T5> action5, Action<T1> action1, Action<T4> action4, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T5> action5, Action<T3> action3, Action<T1> action1, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T5> action5, Action<T3> action3, Action<T4> action4, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T5> action5, Action<T4> action4, Action<T1> action1, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T2> action2, Action<T5> action5, Action<T4> action4, Action<T3> action3, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T1> action1, Action<T2> action2, Action<T4> action4, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T1> action1, Action<T2> action2, Action<T5> action5, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T1> action1, Action<T4> action4, Action<T2> action2, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T1> action1, Action<T4> action4, Action<T5> action5, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T1> action1, Action<T5> action5, Action<T2> action2, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T1> action1, Action<T5> action5, Action<T4> action4, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T2> action2, Action<T1> action1, Action<T4> action4, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T2> action2, Action<T1> action1, Action<T5> action5, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T2> action2, Action<T4> action4, Action<T1> action1, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T2> action2, Action<T4> action4, Action<T5> action5, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T2> action2, Action<T5> action5, Action<T1> action1, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T2> action2, Action<T5> action5, Action<T4> action4, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T4> action4, Action<T1> action1, Action<T2> action2, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T4> action4, Action<T1> action1, Action<T5> action5, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T4> action4, Action<T2> action2, Action<T1> action1, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T4> action4, Action<T2> action2, Action<T5> action5, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T1> action1, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T2> action2, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T5> action5, Action<T1> action1, Action<T2> action2, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T5> action5, Action<T1> action1, Action<T4> action4, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T5> action5, Action<T2> action2, Action<T1> action1, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T5> action5, Action<T2> action2, Action<T4> action4, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T5> action5, Action<T4> action4, Action<T1> action1, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T3> action3, Action<T5> action5, Action<T4> action4, Action<T2> action2, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T1> action1, Action<T2> action2, Action<T5> action5, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T1> action1, Action<T3> action3, Action<T2> action2, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T1> action1, Action<T3> action3, Action<T5> action5, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T1> action1, Action<T5> action5, Action<T2> action2, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T1> action1, Action<T5> action5, Action<T3> action3, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T2> action2, Action<T1> action1, Action<T3> action3, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T2> action2, Action<T1> action1, Action<T5> action5, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T2> action2, Action<T3> action3, Action<T1> action1, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T2> action2, Action<T3> action3, Action<T5> action5, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T2> action2, Action<T5> action5, Action<T1> action1, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T2> action2, Action<T5> action5, Action<T3> action3, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T3> action3, Action<T1> action1, Action<T2> action2, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T3> action3, Action<T1> action1, Action<T5> action5, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T3> action3, Action<T2> action2, Action<T1> action1, Action<T5> action5)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T3> action3, Action<T2> action2, Action<T5> action5, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T3> action3, Action<T5> action5, Action<T1> action1, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T3> action3, Action<T5> action5, Action<T2> action2, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T5> action5, Action<T1> action1, Action<T2> action2, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T5> action5, Action<T1> action1, Action<T3> action3, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T5> action5, Action<T2> action2, Action<T1> action1, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T5> action5, Action<T2> action2, Action<T3> action3, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T5> action5, Action<T3> action3, Action<T1> action1, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T4> action4, Action<T5> action5, Action<T3> action3, Action<T2> action2, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T1> action1, Action<T2> action2, Action<T4> action4, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T1> action1, Action<T3> action3, Action<T2> action2, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T1> action1, Action<T3> action3, Action<T4> action4, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T1> action1, Action<T4> action4, Action<T2> action2, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T1> action1, Action<T4> action4, Action<T3> action3, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T2> action2, Action<T1> action1, Action<T3> action3, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T2> action2, Action<T1> action1, Action<T4> action4, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T2> action2, Action<T3> action3, Action<T1> action1, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T2> action2, Action<T4> action4, Action<T1> action1, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T2> action2, Action<T4> action4, Action<T3> action3, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T3> action3, Action<T1> action1, Action<T2> action2, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T3> action3, Action<T1> action1, Action<T4> action4, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T3> action3, Action<T2> action2, Action<T1> action1, Action<T4> action4)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T3> action3, Action<T2> action2, Action<T4> action4, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T3> action3, Action<T4> action4, Action<T1> action1, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T3> action3, Action<T4> action4, Action<T2> action2, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T4> action4, Action<T1> action1, Action<T2> action2, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T4> action4, Action<T1> action1, Action<T3> action3, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T4> action4, Action<T2> action2, Action<T1> action1, Action<T3> action3)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T4> action4, Action<T2> action2, Action<T3> action3, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T4> action4, Action<T3> action3, Action<T1> action1, Action<T2> action2)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-        }
-        
-        public void Switch(Action<T5> action5, Action<T4> action4, Action<T3> action3, Action<T2> action2, Action<T1> action1)
-        {
-            this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
+        public TResult When<TResult>(Func<T5, TResult> fn)
+        {
+            this.case5.Do(fn, out var r);
+
+            return r;
+        }
+
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+            this.case3.Do(action3.AsFunc(), out r);
+            this.case4.Do(action4.AsFunc(), out r);
+            this.case5.Do(action5.AsFunc(), out r);
+        }
+
+        public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5)
+        {  
+            TResult r = default;
+		    if (this.case1.Do(fn1, out r)) return r;
+            if (this.case2.Do(fn2, out r)) return r;
+            if (this.case3.Do(fn3, out r)) return r;
+            if (this.case4.Do(fn4, out r)) return r;
+            if (this.case5.Do(fn5, out r)) return r;
+         
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
     }
   
@@ -1648,6 +513,7 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
         where T5 : Case
         where T6 : Case
     {
+    
         CaseSelection<T1> case1;
         CaseSelection<T2> case2;
         CaseSelection<T3> case3;
@@ -1743,37 +609,93 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
 
         public void When(Action<T1> action)
         {
-            this.case1.Do(action);
+            this.case1.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T1, TResult> fn)
+        {
+            this.case1.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T2> action)
         {
-            this.case2.Do(action);
+            this.case2.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T2, TResult> fn)
+        {
+            this.case2.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T3> action)
         {
-            this.case3.Do(action);
+            this.case3.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn)
+        {
+            this.case3.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T4> action)
         {
-            this.case4.Do(action);
+            this.case4.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T4, TResult> fn)
+        {
+            this.case4.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T5> action)
         {
-            this.case5.Do(action);
+            this.case5.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T5, TResult> fn)
+        {
+            this.case5.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T6> action)
         {
-            this.case6.Do(action);
+            this.case6.Do(action.AsFunc(), out var r);
         }
 
-        public void Switch(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6)
+        public TResult When<TResult>(Func<T6, TResult> fn)
+        {
+            this.case6.Do(fn, out var r);
+
+            return r;
+        }
+
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6)
         { 
-		    this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-            this.case6.Do(action6);
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+            this.case3.Do(action3.AsFunc(), out r);
+            this.case4.Do(action4.AsFunc(), out r);
+            this.case5.Do(action5.AsFunc(), out r);
+            this.case6.Do(action6.AsFunc(), out r);
+        }
+
+        public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5, Func<T6, TResult> fn6)
+        {  
+            TResult r = default;
+		    if (this.case1.Do(fn1, out r)) return r;
+            if (this.case2.Do(fn2, out r)) return r;
+            if (this.case3.Do(fn3, out r)) return r;
+            if (this.case4.Do(fn4, out r)) return r;
+            if (this.case5.Do(fn5, out r)) return r;
+            if (this.case6.Do(fn6, out r)) return r;
+         
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
     }
   
@@ -1786,6 +708,7 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
         where T6 : Case
         where T7 : Case
     {
+    
         CaseSelection<T1> case1;
         CaseSelection<T2> case2;
         CaseSelection<T3> case3;
@@ -1903,43 +826,109 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
 
         public void When(Action<T1> action)
         {
-            this.case1.Do(action);
+            this.case1.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T1, TResult> fn)
+        {
+            this.case1.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T2> action)
         {
-            this.case2.Do(action);
+            this.case2.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T2, TResult> fn)
+        {
+            this.case2.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T3> action)
         {
-            this.case3.Do(action);
+            this.case3.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn)
+        {
+            this.case3.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T4> action)
         {
-            this.case4.Do(action);
+            this.case4.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T4, TResult> fn)
+        {
+            this.case4.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T5> action)
         {
-            this.case5.Do(action);
+            this.case5.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T5, TResult> fn)
+        {
+            this.case5.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T6> action)
         {
-            this.case6.Do(action);
+            this.case6.Do(action.AsFunc(), out var r);
+        }
+
+        public TResult When<TResult>(Func<T6, TResult> fn)
+        {
+            this.case6.Do(fn, out var r);
+
+            return r;
         }
         public void When(Action<T7> action)
         {
-            this.case7.Do(action);
+            this.case7.Do(action.AsFunc(), out var r);
         }
 
-        public void Switch(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7)
+        public TResult When<TResult>(Func<T7, TResult> fn)
+        {
+            this.case7.Do(fn, out var r);
+
+            return r;
+        }
+
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7)
         { 
-		    this.case1.Do(action1);
-            this.case2.Do(action2);
-            this.case3.Do(action3);
-            this.case4.Do(action4);
-            this.case5.Do(action5);
-            this.case6.Do(action6);
-            this.case7.Do(action7);
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+            this.case3.Do(action3.AsFunc(), out r);
+            this.case4.Do(action4.AsFunc(), out r);
+            this.case5.Do(action5.AsFunc(), out r);
+            this.case6.Do(action6.AsFunc(), out r);
+            this.case7.Do(action7.AsFunc(), out r);
+        }
+
+        public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5, Func<T6, TResult> fn6, Func<T7, TResult> fn7)
+        {  
+            TResult r = default;
+		    if (this.case1.Do(fn1, out r)) return r;
+            if (this.case2.Do(fn2, out r)) return r;
+            if (this.case3.Do(fn3, out r)) return r;
+            if (this.case4.Do(fn4, out r)) return r;
+            if (this.case5.Do(fn5, out r)) return r;
+            if (this.case6.Do(fn6, out r)) return r;
+            if (this.case7.Do(fn7, out r)) return r;
+         
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
     }
+
+
 }
 

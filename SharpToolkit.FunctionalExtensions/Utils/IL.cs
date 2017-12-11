@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using SharpToolkit.FunctionalExtensions.DiscriminatedUnions;
+using System.Reflection.Emit;
+using System.Runtime.Serialization;
 
 namespace SharpToolkit.FunctionalExtensions.Utils
 {
@@ -23,7 +25,7 @@ namespace SharpToolkit.FunctionalExtensions.Utils
                 .Select(fieldInfo =>
                     // For equality comparers should call the x.Equals(x, y).
                     // For the rest the default equality comparison is used.
-                    typeof(IEqualityComparer<>)
+                    typeof(IEquatable<>)
                         .MakeGenericType(fieldInfo.FieldType)
                         .IsAssignableFrom(fieldInfo.FieldType) 
                         ?
@@ -31,8 +33,7 @@ namespace SharpToolkit.FunctionalExtensions.Utils
                     Expression.Not(
                         Expression.Call(
                             Expression.Field(paramA, fieldInfo),
-                            fieldInfo.FieldType.GetMethod("Equals", new[] { fieldInfo.FieldType, fieldInfo.FieldType }),
-                            Expression.Field(paramA, fieldInfo),
+                            fieldInfo.FieldType.GetMethod("Equals", new[] { fieldInfo.FieldType }),
                             Expression.Field(paramB, fieldInfo)
                         )) :
 
@@ -102,7 +103,7 @@ namespace SharpToolkit.FunctionalExtensions.Utils
             var stringJoin =
                 typeof(string).GetMethod("Join", new[] { typeof(string), typeof(string[]) });
 
-            var lineIndent = ((Func<int, string>)IlHelpers.getRecordLineIndent).Method;
+            var lineIndent = ((Func<int, string>)IlHelpers.GetRecordLineIndent).Method;
 
             var getStrings =
                 GetFields<T>()
@@ -145,7 +146,7 @@ namespace SharpToolkit.FunctionalExtensions.Utils
             string getFieldName(FieldInfo nfo)
             {
                 if (nfo.CustomAttributes.Any(x => x.AttributeType == typeof(CompilerGeneratedAttribute)))
-                    return nfo.Name.Substring(1, nfo.Name.IndexOf('>') - 1);
+                    return IlHelpers.StripBakingFieldName(nfo.Name);
 
                 return nfo.Name;
             }
@@ -183,6 +184,127 @@ namespace SharpToolkit.FunctionalExtensions.Utils
             }
         }
 
+        internal static Func<T, T> GenerateRecordCopy<T>()
+            where T : class
+        {
+            var source = Expression.Parameter(typeof(T), "source");
+            var target = Expression.Variable(typeof(T), "target");
+
+            var returnLabel = Expression.Label(typeof(T));
+
+            var constr = 
+                typeof(T)
+                .GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .First();
+
+            var constrArgs =
+                constr
+                .GetParameters()
+                .Select(x =>
+                    new
+                    {
+                        type = x.ParameterType,
+                        val = x.ParameterType.IsValueType ?
+                            Activator.CreateInstance(x.ParameterType) :
+                            null
+                    })
+                .Select(x => Expression.Constant(x.val, x.type));
+
+            var constrCall = Expression.New(constr, constrArgs);
+            var createObj = 
+                Expression.Convert(
+                    Expression.Call(
+                        ((Func<Type, object>)FormatterServices.GetUninitializedObject).Method,
+                        Expression.Constant(typeof(T), typeof(Type))),
+                    typeof(T));
+
+            var assignments =
+                GetFields<T>()
+                .Select(fieldInfo => MakeFieldCopy(source, target, fieldInfo));
+
+            var body =
+                new[] { (Expression)Expression.Assign(target, createObj) }
+                .Concat(assignments)
+                .Concat(new[] {
+                    // This will fail if TRecord is not directly derived from Record
+                    MakeFieldCopy(source, target, typeof(T).BaseType.GetField("utils", 
+                                                                                      BindingFlags.NonPublic | BindingFlags.Instance)),
+                    Expression.Return(returnLabel, target),
+                    Expression.Label(returnLabel, Expression.Default(typeof(T)))
+                });
+
+            var block = Expression.Block(
+                new[] { target },
+                body);
+
+            return Expression.Lambda<Func<T, T>>(block, source).Compile();
+
+            
+                
+        }
+
+        internal static IReadOnlyDictionary<MemberInfo, Action<T, object>> GenerateRecordFieldsSetMap<T>()
+        {
+            var (props, allFields) =
+                GetMembers<T>()
+                .Where(x => x.MemberType == MemberTypes.Field || x.MemberType == MemberTypes.Property)
+                .Partition(x => x.MemberType == MemberTypes.Property)
+                .Do(x => (
+                    x.trues.Cast<PropertyInfo>().ToArray(), 
+                    x.falses.Cast<FieldInfo>().ToArray()));
+
+            var (autoFields, realFields) =
+                allFields
+                .Partition(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(CompilerGeneratedAttribute)))
+                .Do(x => (x.trues.ToArray(), x.falses.ToArray()));
+
+            var autoProps =
+                autoFields
+                .Join(
+                    props,
+                    x => IlHelpers.StripBakingFieldName(x.Name),
+                    x => x.Name,
+                    (x, y) => (prop: y, field: x))
+                .ToArray();
+
+            var realProps =
+                props
+                .Except(autoProps.Select(x => x.prop))
+                .Where(x => x.CanWrite)
+                .ToArray();
+
+            var value = Expression.Parameter(typeof(object), "value");
+            var target = Expression.Parameter(typeof(T), "target");
+
+            var realFieldAssignments =
+                realFields
+                .Select(x => 
+                    (member: (MemberInfo)x,
+                    expression: (Expression)MakeFieldAssign(target, value, x)));
+
+            var autoPropsAssignments =
+                autoProps
+                .Select(x => 
+                    (member: (MemberInfo)x.prop,
+                    expression: (Expression)MakeFieldAssign(target, value, x.field)));
+
+            var realPropsAssignments =
+                realProps
+                .Select(x =>
+                    (member: (MemberInfo)x,
+                    expression: (Expression)Expression.Assign(
+                        Expression.Property(target, x.SetMethod),
+                        value)));
+
+            return
+                realFieldAssignments
+                .Union(autoPropsAssignments)
+                .Union(realPropsAssignments)
+                .ToDictionary(
+                    x => x.member,
+                    x => Expression.Lambda<Action<T, object>>(x.expression, target, value).Compile());
+        }
+
         internal static Func<TCase, TUnion> GenerateCaseCast<TUnion, TCase>(Type caseType)
             where TCase : Case<TUnion>
         {
@@ -201,12 +323,112 @@ namespace SharpToolkit.FunctionalExtensions.Utils
             return Expression.Lambda<Func<TCase, TUnion>>(constructorCall, @case).Compile();
         }
 
+        public static TypeInfo GenerateRecordProxy<T>()
+        {
+            var recordType = typeof(T);
+
+            var domain = AppDomain.CurrentDomain;
+
+            var assemblyName = $"<{recordType.Namespace}.{recordType.Name}>ProxyAssembly";
+            var assembly = AssemblyBuilder.DefineDynamicAssembly(
+                new AssemblyName(assemblyName),
+                AssemblyBuilderAccess.Run);
+
+            var module = assembly.DefineDynamicModule(assemblyName);
+
+            var type = module.DefineType(
+                $"<{recordType.Namespace}.{recordType.Name}>Proxy",
+                TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.AnsiClass | TypeAttributes.AutoClass,
+                recordType
+                );
+
+            var constructor = type.DefineConstructor(
+                MethodAttributes.Public |
+                MethodAttributes.HideBySig |
+                MethodAttributes.RTSpecialName |
+                MethodAttributes.SpecialName,
+                CallingConventions.Standard,
+                new[] { recordType });
+
+            EmitObjectCopy<T>(constructor.GetILGenerator());
+
+            return type.CreateTypeInfo();
+        }
+
+        public static Func<T, T> GenerateCopyConstructorCall<T>(ConstructorInfo info)
+        {
+            var source = Expression.Parameter(typeof(T), "source");
+
+            var constructorCall =
+                Expression.New(
+                    info,
+                    source);
+
+            return Expression.Lambda<Func<T, T>>(constructorCall, source).Compile();
+        }
+
+        private static Expression MakeFieldCopy(ParameterExpression source, ParameterExpression target, FieldInfo nfo)
+        {
+            return
+                MakeFieldAssign(target, Expression.Field(source, nfo), nfo);
+        }
+
+        private static Expression MakeFieldAssign(ParameterExpression target, Expression value, FieldInfo nfo)
+        {
+            return
+                nfo.IsInitOnly ?
+                MakeForceAssign(target, value, nfo) :
+                Expression.Assign(
+                    Expression.Field(target, nfo),
+                    value
+                    );
+        }
+
+        private static Expression MakeForceAssign(ParameterExpression target, Expression value, FieldInfo nfo)
+        {
+            return Expression.Call(
+                ((Action<object, object, FieldInfo>)
+                IlHelpers.ForceAssign).Method,
+                target,
+                value.Type.IsValueType ? Expression.Convert(value, typeof(object)) : value,
+                Expression.Constant(nfo));
+        }
+
         private static FieldInfo[] GetFields<T>()
         {
-            var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var flags = 
+                BindingFlags.Instance | 
+                BindingFlags.Public | 
+                BindingFlags.NonPublic;
 
             return typeof(T)
                 .GetFields(flags);
+        }
+
+        private static MemberInfo[] GetMembers<T>()
+        {
+            var flags =
+                BindingFlags.Instance |
+                BindingFlags.Public |
+                BindingFlags.NonPublic;
+
+            return typeof(T)
+                .GetMembers(flags);
+        }
+
+        private static void EmitObjectCopy<T>(ILGenerator il)
+        {
+            var fields = GetFields<T>();
+
+            foreach (var field in fields)
+            {
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Ldfld, field);
+                il.Emit(OpCodes.Stfld, field);
+            }
+
+            il.Emit(OpCodes.Ret);
         }
     }
 }

@@ -1,8 +1,9 @@
-﻿using System;
+﻿using SharpToolkit.FunctionalExtensions.DiscriminatedUnions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
+namespace SharpToolkit.FunctionalExtensions
 {
     public abstract class Case { }
 

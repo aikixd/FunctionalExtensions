@@ -6,7 +6,7 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
 {
     abstract class CaseSelection<TCase>
     {
-        internal abstract void Do(Action<TCase> action);
+        internal abstract bool Do<TResult>(Func<TCase, TResult> fn, out TResult result);
     }
 
     class SelectedCase<TCase> : CaseSelection<TCase>
@@ -18,9 +18,11 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
             this.@case = @case;
         }
 
-        internal override void Do(Action<TCase> action)
+        internal override bool Do<TResult>(Func<TCase, TResult> fn, out TResult result)
         {
-            action(this.@case);
+            result = fn(this.@case);
+
+            return true;
         }
     }
 
@@ -28,9 +30,11 @@ namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
     {
         internal UnselectedCase() { }
 
-        internal override void Do(Action<TCase> action)
+        internal override bool Do<TResult>(Func<TCase, TResult> fn, out TResult result)
         {
+            result = default;
 
+            return false;
         }
     }
 }
