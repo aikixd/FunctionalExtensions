@@ -181,8 +181,42 @@ _Note: Be sure to make all member immutable._
 
 The record can be compared with other records and two records are equal as long as their members are equal. The comparison takes `IEquatable<T>` interface into account. Readonly fields can be used instead of properties.
 
-The `Validate` method is optional. It returnes the built in Result union. Unfortunately, since C# calls for parent constructor before executing current constructor, it is not possible to call the method after the values are set. Instead there's a static method that can be used.:
+The `Validate` method is optional. It returnes the built in Result union. Unfortunately, since C# calls for parent constructor before executing current constructor, it is not possible to call the method after the values are set. Instead the `Validated` union can be used:
 
 ```CSharp
-public void Deposit()
+public void Deposit(Validated<Money> money)
+{
+    money.Match(
+        valid => { /* Success code */ },
+        invalid => { /* Fail code */ });
+}
+```
+
+The invalid case contains `RecordValidationError` that has the record and error message, explaining why the validation has failed. The valid case is a `Valid<T>` class. It has an internal constructor, so can not be created outside of this library, thus be used as validation enforcer:
+
+```CSharp
+public class Account : Record<Account>
+{
+    public Valid<Money> Money { get; }
+    
+    // Rest of the record
+}
+```
+
+Since the records are immutable, they are modified with the `Copy` method, which allows to easily modify only the modified bits:
+
+```CSharp
+var newMoney = money.Copy(x =>
+    x.With(m => m.Amount, money.Amount + 10));
+// Or
+var newMoney = money.Copy(x =>
+    x.With(m => m.Amount, m => m.Amount + 10));
+```
+
+The second overload is helpful when you need to modify a nested record:
+
+```CSharp
+var modifiedRecord = record.Copy(x1 =>
+    x1.With(r1 => r1.nestedRecord, r1.nestedRecord.Copy(x2 =>
+        x2.With(r2 => r2.someValue, 42))));
 ```
