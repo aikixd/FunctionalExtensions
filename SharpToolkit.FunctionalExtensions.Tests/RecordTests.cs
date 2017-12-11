@@ -296,11 +296,11 @@ namespace SharpToolkit.FunctionalExtensions.Tests
         [TestMethod]
         public void Record_Validation()
         {
-            var v1 = EvenNumber.Valid(new EvenNumber(4));
-            var v2 = EvenNumber.Valid(new EvenNumber(3));
+            var v1 = EvenNumber.Validate(new EvenNumber(4));
+            var v2 = EvenNumber.Validate(new EvenNumber(3));
 
             v1.Match(
-                ok => { },
+                ok => {  },
                 err => { Assert.Fail(); });
 
             v2.Match(

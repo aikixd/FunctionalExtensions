@@ -10,7 +10,7 @@ namespace SharpToolkit.FunctionalExtensions
     /// <summary>
     /// Marker interface
     /// </summary>
-    internal interface IRecord
+    public interface IRecord
     {
 
     }
@@ -30,14 +30,14 @@ namespace SharpToolkit.FunctionalExtensions
             return new Result.Ok();
         }
 
-        public static Result<T> Valid(T record)
+        public static Validated<T> Validate(T record)
         {
             return
                 record
                 .Validate()
-                .Match<Result<T>>(
-                    (Result.Ok x) => new Result<T>.Ok(record),
-                    (Result.Error x) => new Result<T>.Error(x.Value));
+                .Match<Validated<T>>(
+                    (Result.Ok x) => new Valid<T>(record),
+                    (Result.Error x) => new Validated<T>.Invalid(new RecordValidationError<T>(record, x.Value)));
         }
 
         public T Copy(Func<RecordMemberCopy<T>, RecordMemberCopy<T>> alterationsFn)
@@ -48,8 +48,7 @@ namespace SharpToolkit.FunctionalExtensions
 
             foreach (var (member, val) in alterations)
                 this.utils.SetMemberFnMap[member](r, val(r));
-
-
+            
             return r;
         }
 
