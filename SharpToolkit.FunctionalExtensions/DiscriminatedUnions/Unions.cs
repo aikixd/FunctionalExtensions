@@ -5,7 +5,7 @@ namespace SharpToolkit.FunctionalExtensions
 {
 
   
-    public abstract class Union <T1>
+    public abstract class Union<T1> : IEquatable<Union<T1>>
         where T1 : Case
     {
     
@@ -16,7 +16,29 @@ namespace SharpToolkit.FunctionalExtensions
             set(@case);
         }
         
-        private void set(T1 @case)
+        public bool Equals(Union<T1> other)
+        {
+            return 
+                this.case1.Equals(other.case1);
+        }
+
+        public override bool Equals(object other)
+        {
+            if (other is Union<T1> o)
+                return this.Equals(o);
+
+            return false;
+        }
+            public static bool operator == (Union<T1> left, Union<T1> right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator != (Union<T1> left, Union<T1> right)
+        {
+            return !left.Equals(right);
+        }
+            private void set(T1 @case)
         {
             this.case1 = new SelectedCase<T1>(@case);
                     
@@ -49,7 +71,7 @@ namespace SharpToolkit.FunctionalExtensions
         }
     }
   
-    public abstract class Union <T1, T2>
+    public abstract class Union<T1, T2> : IEquatable<Union<T1, T2>>
         where T1 : Case
         where T2 : Case
     {
@@ -66,7 +88,30 @@ namespace SharpToolkit.FunctionalExtensions
             set(@case);
         }
         
-        private void set(T1 @case)
+        public bool Equals(Union<T1, T2> other)
+        {
+            return 
+                this.case1.Equals(other.case1) && 
+                this.case2.Equals(other.case2);
+        }
+
+        public override bool Equals(object other)
+        {
+            if (other is Union<T1, T2> o)
+                return this.Equals(o);
+
+            return false;
+        }
+            public static bool operator == (Union<T1, T2> left, Union<T1, T2> right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator != (Union<T1, T2> left, Union<T1, T2> right)
+        {
+            return !left.Equals(right);
+        }
+            private void set(T1 @case)
         {
             this.case1 = new SelectedCase<T1>(@case);
             this.case2 = new UnselectedCase<T2>();
@@ -119,7 +164,7 @@ namespace SharpToolkit.FunctionalExtensions
         }
     }
   
-    public abstract class Union <T1, T2, T3>
+    public abstract class Union<T1, T2, T3> : IEquatable<Union<T1, T2, T3>>
         where T1 : Case
         where T2 : Case
         where T3 : Case
@@ -142,7 +187,31 @@ namespace SharpToolkit.FunctionalExtensions
             set(@case);
         }
         
-        private void set(T1 @case)
+        public bool Equals(Union<T1, T2, T3> other)
+        {
+            return 
+                this.case1.Equals(other.case1) && 
+                this.case2.Equals(other.case2) && 
+                this.case3.Equals(other.case3);
+        }
+
+        public override bool Equals(object other)
+        {
+            if (other is Union<T1, T2, T3> o)
+                return this.Equals(o);
+
+            return false;
+        }
+            public static bool operator == (Union<T1, T2, T3> left, Union<T1, T2, T3> right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator != (Union<T1, T2, T3> left, Union<T1, T2, T3> right)
+        {
+            return !left.Equals(right);
+        }
+            private void set(T1 @case)
         {
             this.case1 = new SelectedCase<T1>(@case);
             this.case2 = new UnselectedCase<T2>();
@@ -217,7 +286,7 @@ namespace SharpToolkit.FunctionalExtensions
         }
     }
   
-    public abstract class Union <T1, T2, T3, T4>
+    public abstract class Union<T1, T2, T3, T4> : IEquatable<Union<T1, T2, T3, T4>>
         where T1 : Case
         where T2 : Case
         where T3 : Case
@@ -246,7 +315,32 @@ namespace SharpToolkit.FunctionalExtensions
             set(@case);
         }
         
-        private void set(T1 @case)
+        public bool Equals(Union<T1, T2, T3, T4> other)
+        {
+            return 
+                this.case1.Equals(other.case1) && 
+                this.case2.Equals(other.case2) && 
+                this.case3.Equals(other.case3) && 
+                this.case4.Equals(other.case4);
+        }
+
+        public override bool Equals(object other)
+        {
+            if (other is Union<T1, T2, T3, T4> o)
+                return this.Equals(o);
+
+            return false;
+        }
+            public static bool operator == (Union<T1, T2, T3, T4> left, Union<T1, T2, T3, T4> right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator != (Union<T1, T2, T3, T4> left, Union<T1, T2, T3, T4> right)
+        {
+            return !left.Equals(right);
+        }
+            private void set(T1 @case)
         {
             this.case1 = new SelectedCase<T1>(@case);
             this.case2 = new UnselectedCase<T2>();
@@ -345,7 +439,7 @@ namespace SharpToolkit.FunctionalExtensions
         }
     }
   
-    public abstract class Union <T1, T2, T3, T4, T5>
+    public abstract class Union<T1, T2, T3, T4, T5> : IEquatable<Union<T1, T2, T3, T4, T5>>
         where T1 : Case
         where T2 : Case
         where T3 : Case
@@ -380,7 +474,33 @@ namespace SharpToolkit.FunctionalExtensions
             set(@case);
         }
         
-        private void set(T1 @case)
+        public bool Equals(Union<T1, T2, T3, T4, T5> other)
+        {
+            return 
+                this.case1.Equals(other.case1) && 
+                this.case2.Equals(other.case2) && 
+                this.case3.Equals(other.case3) && 
+                this.case4.Equals(other.case4) && 
+                this.case5.Equals(other.case5);
+        }
+
+        public override bool Equals(object other)
+        {
+            if (other is Union<T1, T2, T3, T4, T5> o)
+                return this.Equals(o);
+
+            return false;
+        }
+            public static bool operator == (Union<T1, T2, T3, T4, T5> left, Union<T1, T2, T3, T4, T5> right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator != (Union<T1, T2, T3, T4, T5> left, Union<T1, T2, T3, T4, T5> right)
+        {
+            return !left.Equals(right);
+        }
+            private void set(T1 @case)
         {
             this.case1 = new SelectedCase<T1>(@case);
             this.case2 = new UnselectedCase<T2>();
@@ -505,7 +625,7 @@ namespace SharpToolkit.FunctionalExtensions
         }
     }
   
-    public abstract class Union <T1, T2, T3, T4, T5, T6>
+    public abstract class Union<T1, T2, T3, T4, T5, T6> : IEquatable<Union<T1, T2, T3, T4, T5, T6>>
         where T1 : Case
         where T2 : Case
         where T3 : Case
@@ -546,7 +666,34 @@ namespace SharpToolkit.FunctionalExtensions
             set(@case);
         }
         
-        private void set(T1 @case)
+        public bool Equals(Union<T1, T2, T3, T4, T5, T6> other)
+        {
+            return 
+                this.case1.Equals(other.case1) && 
+                this.case2.Equals(other.case2) && 
+                this.case3.Equals(other.case3) && 
+                this.case4.Equals(other.case4) && 
+                this.case5.Equals(other.case5) && 
+                this.case6.Equals(other.case6);
+        }
+
+        public override bool Equals(object other)
+        {
+            if (other is Union<T1, T2, T3, T4, T5, T6> o)
+                return this.Equals(o);
+
+            return false;
+        }
+            public static bool operator == (Union<T1, T2, T3, T4, T5, T6> left, Union<T1, T2, T3, T4, T5, T6> right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator != (Union<T1, T2, T3, T4, T5, T6> left, Union<T1, T2, T3, T4, T5, T6> right)
+        {
+            return !left.Equals(right);
+        }
+            private void set(T1 @case)
         {
             this.case1 = new SelectedCase<T1>(@case);
             this.case2 = new UnselectedCase<T2>();
@@ -699,7 +846,7 @@ namespace SharpToolkit.FunctionalExtensions
         }
     }
   
-    public abstract class Union <T1, T2, T3, T4, T5, T6, T7>
+    public abstract class Union<T1, T2, T3, T4, T5, T6, T7> : IEquatable<Union<T1, T2, T3, T4, T5, T6, T7>>
         where T1 : Case
         where T2 : Case
         where T3 : Case
@@ -746,7 +893,35 @@ namespace SharpToolkit.FunctionalExtensions
             set(@case);
         }
         
-        private void set(T1 @case)
+        public bool Equals(Union<T1, T2, T3, T4, T5, T6, T7> other)
+        {
+            return 
+                this.case1.Equals(other.case1) && 
+                this.case2.Equals(other.case2) && 
+                this.case3.Equals(other.case3) && 
+                this.case4.Equals(other.case4) && 
+                this.case5.Equals(other.case5) && 
+                this.case6.Equals(other.case6) && 
+                this.case7.Equals(other.case7);
+        }
+
+        public override bool Equals(object other)
+        {
+            if (other is Union<T1, T2, T3, T4, T5, T6, T7> o)
+                return this.Equals(o);
+
+            return false;
+        }
+            public static bool operator == (Union<T1, T2, T3, T4, T5, T6, T7> left, Union<T1, T2, T3, T4, T5, T6, T7> right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator != (Union<T1, T2, T3, T4, T5, T6, T7> left, Union<T1, T2, T3, T4, T5, T6, T7> right)
+        {
+            return !left.Equals(right);
+        }
+            private void set(T1 @case)
         {
             this.case1 = new SelectedCase<T1>(@case);
             this.case2 = new UnselectedCase<T2>();

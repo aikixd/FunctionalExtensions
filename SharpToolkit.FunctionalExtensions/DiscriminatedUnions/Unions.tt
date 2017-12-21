@@ -19,12 +19,15 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
         .Range(1, argumentCount)
         .Select(x => GetTypeArgumentName(x))
         .ToArray();
+
+    var className =
+        "Union<" + 
+        argNames
+        .Aggregate((aggr, cur) => aggr + ", " + cur) + ">";
+    
+    // Class declaration
 #>  
-    public abstract class Union <#= 
-    // Generic parameters
-    "<" + 
-    argNames
-    .Aggregate((aggr, cur) => aggr + ", " + cur) + ">" #>
+    public abstract class <#= className #> : IEquatable<<#= className #>>
 <# 
     // Generic contraints
     foreach (var n in argNames)
@@ -58,6 +61,49 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
 #>
         
 <#
+    // Equals method
+
+    #>
+        public bool Equals(<#= className #> other)
+        {
+            return 
+<# 
+    for (var i = 1; i <= argNames.Length; i += 1)
+    {
+        #>
+                this.case<#= i #>.Equals(other.case<#= i #>)<#
+        if (i != argNames.Length)
+        {
+            #> && 
+<#
+        }
+    }
+#>;
+        }
+
+<#
+    // object.Equals override
+    #>
+        public override bool Equals(object other)
+        {
+            if (other is <#= className #> o)
+                return this.Equals(o);
+
+            return false;
+        }
+    <#
+    // Operators
+    #>
+        public static bool operator == (<#= className #> left, <#= className #> right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator != (<#= className #> left, <#= className #> right)
+        {
+            return !left.Equals(right);
+        }
+    <#
     // Set methods
     for (var i = 1; i <= argNames.Length; i += 1)
     {
