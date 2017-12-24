@@ -53,6 +53,15 @@ As a bonus, any change to the union definition will stop the project from compil
 
 You would be surprised how many use cases fall under the umbrella of discriminated union solutions, and once you get familiar with them, you will start using them in places, you have never considered as problems of type composition.
 
+#### Built in unions
+There are three build in unions: `Option<T>`, `Result` and `Result<T>`. Those unions are intended to remove the null values from the programm. 
+
+Instead of managing the nullable type, it is safer to use the `Option` union. The lack of value at each consumption is an important point that is often overlooked. It also helps to define service boundaries, at points where the lack of value can or can not happen. 
+
+The `Result` unions are there to handle errors. Exceptions can be very unpredicatable: the exception filter may be too broad or too narrow, there's no way to know what exceptions an error can throw, some exceptions can be missed due to tasks and thread management. By using the `Result` you define a contract which clearly defines, that the method can result in an error that must be handled. It contains the message and key-value collection of additional data, that can be used to determine the cause of an error.
+
+Due to semantic importance of those unions, both are implemented as structs.
+
 ### Using Unions
 
 #### Definition
