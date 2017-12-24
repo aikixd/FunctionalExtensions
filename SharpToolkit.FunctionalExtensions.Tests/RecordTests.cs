@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace SharpToolkit.FunctionalExtensions.Tests
 {
@@ -305,7 +306,12 @@ namespace SharpToolkit.FunctionalExtensions.Tests
 
             v2.Match(
                 ok => { Assert.Fail(); },
-                err => { });
+                err => {
+                    Assert.AreEqual("Validation failed.", err.Value.Error.Message);
+                    Assert.AreEqual(1, err.Value.Error.Data.Count());
+                    Assert.AreEqual("Reason", err.Value.Error.Data.First().Key);
+                    Assert.AreEqual("3 is not even.", err.Value.Error.Data.First().Value);
+                });
         }
     }
 }
