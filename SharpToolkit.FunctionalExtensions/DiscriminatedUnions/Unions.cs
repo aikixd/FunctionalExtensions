@@ -56,11 +56,6 @@ namespace SharpToolkit.FunctionalExtensions
             return r;
         }
 
-        public void Match(Action<T1> action1)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1)
         {  
@@ -69,6 +64,14 @@ namespace SharpToolkit.FunctionalExtensions
          
               throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
+
+        public void Match(Action<T1> action1)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+        }
+
+        
     }
   
     public abstract class Union<T1, T2> : IEquatable<Union<T1, T2>>
@@ -147,12 +150,6 @@ namespace SharpToolkit.FunctionalExtensions
             return r;
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
-        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2)
         {  
@@ -162,6 +159,15 @@ namespace SharpToolkit.FunctionalExtensions
          
               throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
+
+        public void Match(Action<T1> action1, Action<T2> action2)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+        }
+
+        
     }
   
     public abstract class Union<T1, T2, T3> : IEquatable<Union<T1, T2, T3>>
@@ -267,13 +273,6 @@ namespace SharpToolkit.FunctionalExtensions
             return r;
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
-            this.case3.Do(action3.AsFunc(), out r);
-        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3)
         {  
@@ -284,6 +283,16 @@ namespace SharpToolkit.FunctionalExtensions
          
               throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
+
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+            this.case3.Do(action3.AsFunc(), out r);
+        }
+
+        
     }
   
     public abstract class Union<T1, T2, T3, T4> : IEquatable<Union<T1, T2, T3, T4>>
@@ -418,14 +427,6 @@ namespace SharpToolkit.FunctionalExtensions
             return r;
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
-            this.case3.Do(action3.AsFunc(), out r);
-            this.case4.Do(action4.AsFunc(), out r);
-        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4)
         {  
@@ -437,6 +438,17 @@ namespace SharpToolkit.FunctionalExtensions
          
               throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
+
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+            this.case3.Do(action3.AsFunc(), out r);
+            this.case4.Do(action4.AsFunc(), out r);
+        }
+
+        
     }
   
     public abstract class Union<T1, T2, T3, T4, T5> : IEquatable<Union<T1, T2, T3, T4, T5>>
@@ -602,15 +614,6 @@ namespace SharpToolkit.FunctionalExtensions
             return r;
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
-            this.case3.Do(action3.AsFunc(), out r);
-            this.case4.Do(action4.AsFunc(), out r);
-            this.case5.Do(action5.AsFunc(), out r);
-        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5)
         {  
@@ -623,6 +626,18 @@ namespace SharpToolkit.FunctionalExtensions
          
               throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
+
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+            this.case3.Do(action3.AsFunc(), out r);
+            this.case4.Do(action4.AsFunc(), out r);
+            this.case5.Do(action5.AsFunc(), out r);
+        }
+
+        
     }
   
     public abstract class Union<T1, T2, T3, T4, T5, T6> : IEquatable<Union<T1, T2, T3, T4, T5, T6>>
@@ -821,16 +836,6 @@ namespace SharpToolkit.FunctionalExtensions
             return r;
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
-            this.case3.Do(action3.AsFunc(), out r);
-            this.case4.Do(action4.AsFunc(), out r);
-            this.case5.Do(action5.AsFunc(), out r);
-            this.case6.Do(action6.AsFunc(), out r);
-        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5, Func<T6, TResult> fn6)
         {  
@@ -844,6 +849,19 @@ namespace SharpToolkit.FunctionalExtensions
          
               throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
+
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+            this.case3.Do(action3.AsFunc(), out r);
+            this.case4.Do(action4.AsFunc(), out r);
+            this.case5.Do(action5.AsFunc(), out r);
+            this.case6.Do(action6.AsFunc(), out r);
+        }
+
+        
     }
   
     public abstract class Union<T1, T2, T3, T4, T5, T6, T7> : IEquatable<Union<T1, T2, T3, T4, T5, T6, T7>>
@@ -1077,17 +1095,6 @@ namespace SharpToolkit.FunctionalExtensions
             return r;
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
-            this.case3.Do(action3.AsFunc(), out r);
-            this.case4.Do(action4.AsFunc(), out r);
-            this.case5.Do(action5.AsFunc(), out r);
-            this.case6.Do(action6.AsFunc(), out r);
-            this.case7.Do(action7.AsFunc(), out r);
-        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5, Func<T6, TResult> fn6, Func<T7, TResult> fn7)
         {  
@@ -1102,6 +1109,20 @@ namespace SharpToolkit.FunctionalExtensions
          
               throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
+
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7)
+        { 
+            int r = default;
+		    this.case1.Do(action1.AsFunc(), out r);
+            this.case2.Do(action2.AsFunc(), out r);
+            this.case3.Do(action3.AsFunc(), out r);
+            this.case4.Do(action4.AsFunc(), out r);
+            this.case5.Do(action5.AsFunc(), out r);
+            this.case6.Do(action6.AsFunc(), out r);
+            this.case7.Do(action7.AsFunc(), out r);
+        }
+
+        
     }
 
 

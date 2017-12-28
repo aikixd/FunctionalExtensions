@@ -76,7 +76,7 @@ namespace SharpToolkit.FunctionalExtensions
         private ResultBacking makeUnion()
         {
             if (this.union == null)
-                union = new Error(new ErrorResult("Union created implicitly."));
+                union = new Error(new ErrorResult("Result created implicitly."));
 
             return union;
         }
@@ -101,14 +101,14 @@ namespace SharpToolkit.FunctionalExtensions
             return this.unionSafe.When(fn);
         }
 
-        public void Match(Action<Ok> okAction, Action<Error> errorAction)
-        {
-            this.unionSafe.Match(okAction, errorAction);
-        }
-
         public TResult Match<TResult>(Func<Ok, TResult> okFn, Func<Error, TResult> errorFn)
         {
             return this.unionSafe.Match(okFn, errorFn);
+        }
+
+        public void Match(Action<Ok> okAction, Action<Error> errorAction)
+        {
+            this.unionSafe.Match(okAction, errorAction);
         }
 
         public bool Equals(Result other)
@@ -167,7 +167,7 @@ namespace SharpToolkit.FunctionalExtensions
         private ResultBacking makeUnion()
         {
             if (this.union == null)
-                union = new Error(new ErrorResult("Result union's case can't be created implicitly."));
+                union = new Error(new ErrorResult("Result created implicitly."));
 
             return union;
         }
@@ -192,14 +192,14 @@ namespace SharpToolkit.FunctionalExtensions
             return this.unionSafe.When(fn);
         }
 
-        public void Match(Action<Ok> okAction, Action<Error> errorAction)
-        {
-            this.unionSafe.Match(okAction, errorAction);
-        }
-
         public TResult Match<TResult>(Func<Ok, TResult> okFn, Func<Error, TResult> errorFn)
         {
             return this.unionSafe.Match(okFn, errorFn);
+        }
+
+        public void Match(Action<Ok> okAction, Action<Error> errorAction)
+        {
+            this.unionSafe.Match(okAction, errorAction);
         }
 
         public bool Equals(Result<T> other)

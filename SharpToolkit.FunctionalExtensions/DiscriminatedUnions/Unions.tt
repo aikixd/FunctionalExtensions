@@ -148,7 +148,7 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
 #>
 
 <#
-    // Switch methods
+    // Match methods
     var permutatedSwtichLimit = 0;
     
 	// When the number of type arguments is less then the limit, create all switch permutations
@@ -201,21 +201,6 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
     else
     {
         #>
-        public void Match(<#= 
-            argNames
-            .Select((x, i) => new { str = x, i = i + 1 })
-            .Select(x => "Action<" + x.str + "> action" + x.i)
-            .Aggregate((aggr, cur) => aggr + ", " + cur)
-        #>)
-        { 
-            int r = default;
-		<#
-        for (var i = 1; i <= argNames.Length; i += 1)
-        {
-        #>    this.case<#= i #>.Do(action<#= i #>.AsFunc(), out r);
-        <#
-        }
-        #>}
 
         public TResult Match<TResult>(<#= 
             argNames
@@ -234,6 +219,24 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
         #> 
               throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
         }
+
+        public void Match(<#= 
+            argNames
+            .Select((x, i) => new { str = x, i = i + 1 })
+            .Select(x => "Action<" + x.str + "> action" + x.i)
+            .Aggregate((aggr, cur) => aggr + ", " + cur)
+        #>)
+        { 
+            int r = default;
+		<#
+        for (var i = 1; i <= argNames.Length; i += 1)
+        {
+        #>    this.case<#= i #>.Do(action<#= i #>.AsFunc(), out r);
+        <#
+        }
+        #>}
+
+        
 <#
     } // else
 
