@@ -389,6 +389,17 @@ namespace SharpToolkit.FunctionalExtensions
             this.union = new Result.ErrorBacking(@case);
         }
 
+        public void When(Action<Result.Error> action)
+        {
+            this.unionSafe.When(x => action(x.Value));
+        }
+
+        public TResult When<TResult>(Func<Result.Error, TResult> fn)
+        {
+            return this.unionSafe.When(x => fn(x.Value));
+        }
+
+
         /********** Result.Error cast operator **********/
         public static implicit operator Result<T>(Result.Error @case)
         {
