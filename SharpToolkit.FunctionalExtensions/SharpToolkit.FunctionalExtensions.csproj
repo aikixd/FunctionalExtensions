@@ -30,12 +30,21 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="Result.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Result.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <None Update="DiscriminatedUnions\Unions.tt">
       <LastGenOutput>Unions.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="Result.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Result.cs</LastGenOutput>
     </None>
   </ItemGroup>
 

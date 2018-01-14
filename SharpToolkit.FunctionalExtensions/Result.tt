@@ -1,0 +1,290 @@
+﻿<#@ template debug="true" hostSpecific="true" #>
+<#@ output extension=".cs" #>
+<#@ Assembly Name="System.Core.dll" #>
+<#@ Assembly Name="System.Xml.dll" #>
+<#@ Assembly Name="System.Xml.Linq.dll" #>
+<#@ Assembly Name="System.Windows.Forms.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Diagnostics" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #> 
+
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Linq;
+
+namespace SharpToolkit.FunctionalExtensions
+{
+    public class ErrorResult
+    {
+        public string Message { get; }
+        public IEnumerable<KeyValuePair<string, string>> Data { get; }
+
+        public ErrorResult(string message, IEnumerable<KeyValuePair<string, string>> data)
+        {
+            this.Message = message;
+            this.Data = data;
+        }
+
+        public ErrorResult(string message, IEnumerable<(string key, string value)> data)
+            : this(message, data.Select(x => new KeyValuePair<string, string>(x.key, x.value)))
+        {
+
+        }
+
+        public ErrorResult(string message, params (string key, string value)[] data)
+            : this(message, data.Select(x => new KeyValuePair<string, string>(x.key, x.value)))
+        {
+
+        }
+    }
+
+
+<# 
+    var resultBakingData = new [] { 
+        new {
+            structName = "Result",
+            backs = new [] { 
+                new {
+                    name = "Ok",
+                    typeArgument = "ResultBacking",
+                    genericType = "",
+                    hasValue = false,
+                    isGeneric = false
+                },
+                new {
+                    name = "Error",
+                    typeArgument = "ResultBacking, ErrorResult",
+                    genericType = "ErrorResult",
+                    hasValue = true,
+                    isGeneric = false
+                }
+            }
+        },
+        new {
+            structName = "Result<T>",
+            backs = new [] { 
+                new {
+                    name = "Ok",
+                    typeArgument = "ResultBacking",
+                    genericType = "T",
+                    hasValue = true,
+                    isGeneric = true
+                },
+                new {
+                    name = "Error",
+                    typeArgument = "ResultBacking, ErrorResult",
+                    genericType = "ErrorResult",
+                    hasValue = true,
+                    isGeneric = false
+                }
+            }
+        }};
+
+    foreach (var data in resultBakingData)
+    {
+        // Union struct
+
+        #>
+    /<#= GenerateStars(data.structName.Length + 28) #>/
+    /********** <#= data.structName #> union **********/
+    /<#= GenerateStars(data.structName.Length + 28) #>/
+    public struct <#= data.structName #> : IEquatable<<#= data.structName #>>
+    {
+        #region Struct backing union
+
+        private ResultBacking union;
+        private ResultBacking unionSafe =>
+            union ?? MakeUnion();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private ResultBacking MakeUnion()
+        {
+            if (this.union == null)
+                union = new ErrorBacking(new Error(new ErrorResult("Result created implicitly.")));
+
+            return union;
+        }
+
+        #endregion
+        
+        /*****************************************/
+        /********** Union backing class **********/
+        /*****************************************/
+        internal class ResultBacking : Union<OkBacking, ErrorBacking>
+        {
+            public ResultBacking(OkBacking @case) : base(@case)
+            {
+            }
+
+            public ResultBacking(ErrorBacking @case) : base(@case)
+            {
+            } 
+        }
+        <# 
+
+        foreach (var back in data.backs)
+        {
+            #>            
+        /<#= GenerateStars(back.name.Length + 27) #>/
+        /********** <#= back.name #> case **********/
+        /<#= GenerateStars(back.name.Length + 27) #>/
+
+        /********** Union wrapper constructor **********/
+        public Result(<#= back.name #> @case)
+        {
+            this.union = new <#= back.name #>Backing(@case);
+        }        
+        
+        /********** Case wrapper **********/
+        public class <#= back.name #> : IEquatable<<#= back.name #>>
+        {
+<#          if (back.hasValue)
+            {#>
+            public <#= back.genericType #> Value { get; }
+<#          }#>
+
+<#          if (back.hasValue)
+            { #>
+            public <#= back.name #>(<#= back.genericType #> value)
+            {
+                this.Value = value;
+            }
+
+<#          }
+            else 
+            { #>
+            public <#= back.name #>()
+            {
+                
+            }
+<#          } #>
+            
+            /*********** Equals(object) ***********/
+            public override bool Equals(object obj)
+            {
+<#          if (back.hasValue)
+            { #>
+                if (obj is <#= back.name #> o)
+                    return this.Equals(o);
+
+                return false;
+<#          }
+            else { #>
+                return obj is <#= back.name #>;
+<#          } #>
+            }
+
+            /*********** Equals(T) ***********/
+            public bool Equals(<#= back.name #> other)
+            {
+<#          if (back.hasValue)
+            { #>
+                return this.Value.Equals(other.Value);
+<#          } 
+            else
+            {#>
+                // Type has no value
+                return true;
+<#          } #>
+            }
+
+            public override int GetHashCode()
+            {
+<#          if (back.hasValue)                
+            { #>
+            
+                return this.Value.GetHashCode();
+<#          }
+            else
+            { #>
+                // Since the type has no value each instance is the same.
+                return 1;
+<#          } #>
+            }
+
+            public <#= data.structName #> ToUnion =>            
+                new <#= data.structName #>(this);
+            
+            
+            public static implicit operator <#= data.structName #>(<#= back.name #> @case) =>
+                new <#= data.structName #>(@case);
+
+            public static bool operator == (<#= back.name #> left, <#= back.name #> right) =>
+                left.Equals(right);            
+
+            public static bool operator != (<#= back.name #> left, <#= back.name #> right) =>
+                !left.Equals(right);
+        }
+
+        /*********** Real case **********/
+        internal class <#= back.name #>Backing : Case<ResultBacking, <#= back.name #>>
+        {
+            public <#= back.name #>Backing(<#= back.name #> value) : base(value)
+            {
+                
+            }
+        }
+
+        /********** Union case methods **********/
+
+        public void When(Action<<#= back.name #>> action)
+        {
+            this.unionSafe.When(x => action(x.Value));
+        }
+
+        public TResult When<TResult>(Func<<#= back.name #>, TResult> fn)
+        {
+            return this.unionSafe.When(x => fn(x.Value));
+        }
+<#
+        
+        
+        } // foreach case backing
+
+
+        
+        #>
+
+        /********** Match methods **********/
+        public void Match(<#= string.Join(", ", data.backs.Select((x, i) => "Action<" + x.name + "> a" + i.ToString())) #>)
+        {
+            this.unionSafe.Match(
+                <#= string.Join(
+                ",\r\n                ",
+                data.backs.Select((x, i) => "x => a" + i.ToString() + "(x.Value)")) #>
+            );
+        }
+
+        public TResult Match<TResult>(<#= string.Join(", ", data.backs.Select((x, i) => "Func<" + x.name + ", TResult> fn" + i.ToString())) #>)
+        {
+            return this.unionSafe.Match(
+                <#= string.Join(
+                ",\r\n                ",
+                data.backs.Select((x, i) => "x => fn" + i.ToString() + "(x.Value)")) #>
+            );
+        }
+
+        /********** Union case IEquitable **********/
+
+        public bool Equals(<#= data.structName #> other)
+        {
+            return this.unionSafe == other.unionSafe;
+        }
+    }
+
+<#
+    }
+#>
+
+} 
+<#+  
+string GenerateStars(int l)
+{
+    return string.Join("", Enumerable.Range(0, l).Select(_ => "*"));
+}
+#>

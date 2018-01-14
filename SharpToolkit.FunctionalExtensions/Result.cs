@@ -1,8 +1,9 @@
-﻿using System;
+﻿ 
+
+using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Linq;
 
 namespace SharpToolkit.FunctionalExtensions
 {
@@ -30,181 +31,432 @@ namespace SharpToolkit.FunctionalExtensions
         }
     }
 
+
+    /**********************************/
+    /********** Result union **********/
+    /**********************************/
     public struct Result : IEquatable<Result>
     {
-        public class ResultBacking : Union<Ok, Error>
-        {
-            public ResultBacking(Ok @case) : base(@case)
-            {
-            }
-
-            public ResultBacking(Error @case) : base(@case)
-            {
-            }            
-        }
-
-        public class Ok : Case<ResultBacking>
-        {
-            public static implicit operator Result(Ok @case) =>
-                new Result(@case);
-        }
-        public class Error : Case<ResultBacking, ErrorResult>
-        {
-            public Error(ErrorResult value) : base(value)
-            {
-            }
-
-            public static implicit operator Result(Error @case) =>
-                new Result(@case);
-        }
-
-        public Result(Ok @case)
-        {
-            this.union = @case;
-        }
-
-        public Result(Error @case)
-        {
-            this.union = @case;
-        }
+        #region Struct backing union
 
         private ResultBacking union;
         private ResultBacking unionSafe =>
-            union ?? makeUnion();
+            union ?? MakeUnion();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ResultBacking makeUnion()
+        private ResultBacking MakeUnion()
         {
             if (this.union == null)
-                union = new Error(new ErrorResult("Result created implicitly."));
+                union = new ErrorBacking(new Error(new ErrorResult("Result created implicitly.")));
 
             return union;
         }
 
-        public void When(Action<Ok> action)
+        #endregion
+        
+        /*****************************************/
+        /********** Union backing class **********/
+        /*****************************************/
+        internal class ResultBacking : Union<OkBacking, ErrorBacking>
         {
-            this.unionSafe.When(action);
+            public ResultBacking(OkBacking @case) : base(@case)
+            {
+            }
+
+            public ResultBacking(ErrorBacking @case) : base(@case)
+            {
+            } 
+        }
+                    
+        /*****************************/
+        /********** Ok case **********/
+        /*****************************/
+
+        /********** Union wrapper constructor **********/
+        public Result(Ok @case)
+        {
+            this.union = new OkBacking(@case);
+        }        
+        
+        /********** Case wrapper **********/
+        public class Ok : IEquatable<Ok>
+        {
+
+            public Ok()
+            {
+                
+            }
+            
+            /*********** Equals(object) ***********/
+            public override bool Equals(object obj)
+            {
+                return obj is Ok;
+            }
+
+            /*********** Equals(T) ***********/
+            public bool Equals(Ok other)
+            {
+                // Type has no value
+                return true;
+            }
+
+            public override int GetHashCode()
+            {
+                // Since the type has no value each instance is the same.
+                return 1;
+            }
+
+            public Result ToUnion =>            
+                new Result(this);
+            
+            
+            public static implicit operator Result(Ok @case) =>
+                new Result(@case);
+
+            public static bool operator == (Ok left, Ok right) =>
+                left.Equals(right);            
+
+            public static bool operator != (Ok left, Ok right) =>
+                !left.Equals(right);
         }
 
-        public void When(Action<Error> action)
+        /*********** Real case **********/
+        internal class OkBacking : Case<ResultBacking, Ok>
         {
-            this.unionSafe.When(action);
+            public OkBacking(Ok value) : base(value)
+            {
+                
+            }
+        }
+
+        /********** Union case methods **********/
+
+        public void When(Action<Ok> action)
+        {
+            this.unionSafe.When(x => action(x.Value));
         }
 
         public TResult When<TResult>(Func<Ok, TResult> fn)
         {
-            return this.unionSafe.When(fn);
+            return this.unionSafe.When(x => fn(x.Value));
+        }
+            
+        /********************************/
+        /********** Error case **********/
+        /********************************/
+
+        /********** Union wrapper constructor **********/
+        public Result(Error @case)
+        {
+            this.union = new ErrorBacking(@case);
+        }        
+        
+        /********** Case wrapper **********/
+        public class Error : IEquatable<Error>
+        {
+            public ErrorResult Value { get; }
+
+            public Error(ErrorResult value)
+            {
+                this.Value = value;
+            }
+
+            
+            /*********** Equals(object) ***********/
+            public override bool Equals(object obj)
+            {
+                if (obj is Error o)
+                    return this.Equals(o);
+
+                return false;
+            }
+
+            /*********** Equals(T) ***********/
+            public bool Equals(Error other)
+            {
+                return this.Value.Equals(other.Value);
+            }
+
+            public override int GetHashCode()
+            {
+            
+                return this.Value.GetHashCode();
+            }
+
+            public Result ToUnion =>            
+                new Result(this);
+            
+            
+            public static implicit operator Result(Error @case) =>
+                new Result(@case);
+
+            public static bool operator == (Error left, Error right) =>
+                left.Equals(right);            
+
+            public static bool operator != (Error left, Error right) =>
+                !left.Equals(right);
+        }
+
+        /*********** Real case **********/
+        internal class ErrorBacking : Case<ResultBacking, Error>
+        {
+            public ErrorBacking(Error value) : base(value)
+            {
+                
+            }
+        }
+
+        /********** Union case methods **********/
+
+        public void When(Action<Error> action)
+        {
+            this.unionSafe.When(x => action(x.Value));
         }
 
         public TResult When<TResult>(Func<Error, TResult> fn)
         {
-            return this.unionSafe.When(fn);
+            return this.unionSafe.When(x => fn(x.Value));
         }
 
-        public TResult Match<TResult>(Func<Ok, TResult> okFn, Func<Error, TResult> errorFn)
+        /********** Match methods **********/
+        public void Match(Action<Ok> a0, Action<Error> a1)
         {
-            return this.unionSafe.Match(okFn, errorFn);
+            this.unionSafe.Match(
+                x => a0(x.Value),
+                x => a1(x.Value)
+            );
         }
 
-        public void Match(Action<Ok> okAction, Action<Error> errorAction)
+        public TResult Match<TResult>(Func<Ok, TResult> fn0, Func<Error, TResult> fn1)
         {
-            this.unionSafe.Match(okAction, errorAction);
+            return this.unionSafe.Match(
+                x => fn0(x.Value),
+                x => fn1(x.Value)
+            );
         }
+
+        /********** Union case IEquitable **********/
 
         public bool Equals(Result other)
         {
-            return this.unionSafe.Equals(other.unionSafe);
+            return this.unionSafe == other.unionSafe;
         }
     }
 
+    /*************************************/
+    /********** Result<T> union **********/
+    /*************************************/
     public struct Result<T> : IEquatable<Result<T>>
     {
-        public class ResultBacking : Union<Ok, Error>
-        {
-            public ResultBacking(Ok @case) : base(@case)
-            {
-            }
-
-            public ResultBacking(Error @case) : base(@case)
-            {
-            }
-        }
-
-        public class Ok : Case<ResultBacking, T>
-        {
-            public Ok(T value) : base(value)
-            {
-            }
-
-            public static implicit operator Result<T>(Ok @case) =>
-                new Result<T>(@case);
-        }
-        public class Error : Case<ResultBacking, ErrorResult>
-        {
-            public Error(ErrorResult value) : base(value)
-            {
-            }
-
-            public static implicit operator Result<T>(Error @case) =>
-                new Result<T>(@case);
-        }
-
-        public Result(Ok @case)
-        {
-            this.union = @case;
-        }
-
-        public Result(Error @case)
-        {
-            this.union = @case;
-        }
+        #region Struct backing union
 
         private ResultBacking union;
         private ResultBacking unionSafe =>
-            union ?? makeUnion();
+            union ?? MakeUnion();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ResultBacking makeUnion()
+        private ResultBacking MakeUnion()
         {
             if (this.union == null)
-                union = new Error(new ErrorResult("Result created implicitly."));
+                union = new ErrorBacking(new Error(new ErrorResult("Result created implicitly.")));
 
             return union;
         }
 
-        public void When(Action<Ok> action)
+        #endregion
+        
+        /*****************************************/
+        /********** Union backing class **********/
+        /*****************************************/
+        internal class ResultBacking : Union<OkBacking, ErrorBacking>
         {
-            this.unionSafe.When(action);
+            public ResultBacking(OkBacking @case) : base(@case)
+            {
+            }
+
+            public ResultBacking(ErrorBacking @case) : base(@case)
+            {
+            } 
+        }
+                    
+        /*****************************/
+        /********** Ok case **********/
+        /*****************************/
+
+        /********** Union wrapper constructor **********/
+        public Result(Ok @case)
+        {
+            this.union = new OkBacking(@case);
+        }        
+        
+        /********** Case wrapper **********/
+        public class Ok : IEquatable<Ok>
+        {
+            public T Value { get; }
+
+            public Ok(T value)
+            {
+                this.Value = value;
+            }
+
+            
+            /*********** Equals(object) ***********/
+            public override bool Equals(object obj)
+            {
+                if (obj is Ok o)
+                    return this.Equals(o);
+
+                return false;
+            }
+
+            /*********** Equals(T) ***********/
+            public bool Equals(Ok other)
+            {
+                return this.Value.Equals(other.Value);
+            }
+
+            public override int GetHashCode()
+            {
+            
+                return this.Value.GetHashCode();
+            }
+
+            public Result<T> ToUnion =>            
+                new Result<T>(this);
+            
+            
+            public static implicit operator Result<T>(Ok @case) =>
+                new Result<T>(@case);
+
+            public static bool operator == (Ok left, Ok right) =>
+                left.Equals(right);            
+
+            public static bool operator != (Ok left, Ok right) =>
+                !left.Equals(right);
         }
 
-        public void When(Action<Error> action)
+        /*********** Real case **********/
+        internal class OkBacking : Case<ResultBacking, Ok>
         {
-            this.unionSafe.When(action);
+            public OkBacking(Ok value) : base(value)
+            {
+                
+            }
+        }
+
+        /********** Union case methods **********/
+
+        public void When(Action<Ok> action)
+        {
+            this.unionSafe.When(x => action(x.Value));
         }
 
         public TResult When<TResult>(Func<Ok, TResult> fn)
         {
-            return this.unionSafe.When(fn);
+            return this.unionSafe.When(x => fn(x.Value));
+        }
+            
+        /********************************/
+        /********** Error case **********/
+        /********************************/
+
+        /********** Union wrapper constructor **********/
+        public Result(Error @case)
+        {
+            this.union = new ErrorBacking(@case);
+        }        
+        
+        /********** Case wrapper **********/
+        public class Error : IEquatable<Error>
+        {
+            public ErrorResult Value { get; }
+
+            public Error(ErrorResult value)
+            {
+                this.Value = value;
+            }
+
+            
+            /*********** Equals(object) ***********/
+            public override bool Equals(object obj)
+            {
+                if (obj is Error o)
+                    return this.Equals(o);
+
+                return false;
+            }
+
+            /*********** Equals(T) ***********/
+            public bool Equals(Error other)
+            {
+                return this.Value.Equals(other.Value);
+            }
+
+            public override int GetHashCode()
+            {
+            
+                return this.Value.GetHashCode();
+            }
+
+            public Result<T> ToUnion =>            
+                new Result<T>(this);
+            
+            
+            public static implicit operator Result<T>(Error @case) =>
+                new Result<T>(@case);
+
+            public static bool operator == (Error left, Error right) =>
+                left.Equals(right);            
+
+            public static bool operator != (Error left, Error right) =>
+                !left.Equals(right);
+        }
+
+        /*********** Real case **********/
+        internal class ErrorBacking : Case<ResultBacking, Error>
+        {
+            public ErrorBacking(Error value) : base(value)
+            {
+                
+            }
+        }
+
+        /********** Union case methods **********/
+
+        public void When(Action<Error> action)
+        {
+            this.unionSafe.When(x => action(x.Value));
         }
 
         public TResult When<TResult>(Func<Error, TResult> fn)
         {
-            return this.unionSafe.When(fn);
+            return this.unionSafe.When(x => fn(x.Value));
         }
 
-        public TResult Match<TResult>(Func<Ok, TResult> okFn, Func<Error, TResult> errorFn)
+        /********** Match methods **********/
+        public void Match(Action<Ok> a0, Action<Error> a1)
         {
-            return this.unionSafe.Match(okFn, errorFn);
+            this.unionSafe.Match(
+                x => a0(x.Value),
+                x => a1(x.Value)
+            );
         }
 
-        public void Match(Action<Ok> okAction, Action<Error> errorAction)
+        public TResult Match<TResult>(Func<Ok, TResult> fn0, Func<Error, TResult> fn1)
         {
-            this.unionSafe.Match(okAction, errorAction);
+            return this.unionSafe.Match(
+                x => fn0(x.Value),
+                x => fn1(x.Value)
+            );
         }
+
+        /********** Union case IEquitable **********/
 
         public bool Equals(Result<T> other)
         {
-            return this.unionSafe.Equals(other.unionSafe);
+            return this.unionSafe == other.unionSafe;
         }
     }
-}
+
+
+} 
