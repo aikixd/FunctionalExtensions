@@ -39,6 +39,9 @@ namespace SharpToolkit.FunctionalExtensions
             return this.type.GetHashCode();
         }
 
+        public TUnion ToUnion =>
+            this.TypeUtils.CastFn(this);
+
         public static implicit operator TUnion(Case<TUnion> @case)
         {
             return @case.TypeUtils.CastFn(@case);
