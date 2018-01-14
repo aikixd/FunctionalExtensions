@@ -47,7 +47,7 @@ namespace SharpToolkit.FunctionalExtensions
         private ResultBacking MakeUnion()
         {
             if (this.union == null)
-                union = new ErrorBacking(new Error(new ErrorResult("Result created implicitly.")));
+                union = new Result.ErrorBacking(new Result.Error(new ErrorResult("Result created implicitly.")));
 
             return union;
         }
@@ -57,27 +57,28 @@ namespace SharpToolkit.FunctionalExtensions
         /*****************************************/
         /********** Union backing class **********/
         /*****************************************/
-        internal class ResultBacking : Union<OkBacking, ErrorBacking>
+        internal class ResultBacking : Union<OkBacking, Result.ErrorBacking>
         {
             public ResultBacking(OkBacking @case) : base(@case)
             {
             }
 
-            public ResultBacking(ErrorBacking @case) : base(@case)
+            public ResultBacking(Result.ErrorBacking @case) : base(@case)
             {
             } 
         }
-                    
+         
         /*****************************/
         /********** Ok case **********/
         /*****************************/
+                        
 
         /********** Union wrapper constructor **********/
         public Result(Ok @case)
         {
             this.union = new OkBacking(@case);
         }        
-        
+
         /********** Case wrapper **********/
         public class Ok : IEquatable<Ok>
         {
@@ -106,13 +107,9 @@ namespace SharpToolkit.FunctionalExtensions
                 return 1;
             }
 
-            public Result ToUnion =>            
+            public Result ToUnion() =>            
                 new Result(this);
             
-            
-            public static implicit operator Result(Ok @case) =>
-                new Result(@case);
-
             public static bool operator == (Ok left, Ok right) =>
                 left.Equals(right);            
 
@@ -140,17 +137,28 @@ namespace SharpToolkit.FunctionalExtensions
         {
             return this.unionSafe.When(x => fn(x.Value));
         }
+
+        /********** Ok cast operator **********/
+        public static implicit operator Result(Ok @case)
+        {
+            return new Result(@case);
+        }
+
+        /************************************/
+        /********** End of Ok case **********/
+        /************************************/
             
         /********************************/
         /********** Error case **********/
         /********************************/
+                        
 
         /********** Union wrapper constructor **********/
         public Result(Error @case)
         {
             this.union = new ErrorBacking(@case);
         }        
-        
+
         /********** Case wrapper **********/
         public class Error : IEquatable<Error>
         {
@@ -183,13 +191,7 @@ namespace SharpToolkit.FunctionalExtensions
                 return this.Value.GetHashCode();
             }
 
-            public Result ToUnion =>            
-                new Result(this);
             
-            
-            public static implicit operator Result(Error @case) =>
-                new Result(@case);
-
             public static bool operator == (Error left, Error right) =>
                 left.Equals(right);            
 
@@ -218,6 +220,16 @@ namespace SharpToolkit.FunctionalExtensions
             return this.unionSafe.When(x => fn(x.Value));
         }
 
+        /********** Error cast operator **********/
+        public static implicit operator Result(Error @case)
+        {
+            return new Result(@case);
+        }
+
+        /***************************************/
+        /********** End of Error case **********/
+        /***************************************/
+           
         /********** Match methods **********/
         public void Match(Action<Ok> a0, Action<Error> a1)
         {
@@ -258,7 +270,7 @@ namespace SharpToolkit.FunctionalExtensions
         private ResultBacking MakeUnion()
         {
             if (this.union == null)
-                union = new ErrorBacking(new Error(new ErrorResult("Result created implicitly.")));
+                union = new Result.ErrorBacking(new Result.Error(new ErrorResult("Result created implicitly.")));
 
             return union;
         }
@@ -268,27 +280,32 @@ namespace SharpToolkit.FunctionalExtensions
         /*****************************************/
         /********** Union backing class **********/
         /*****************************************/
-        internal class ResultBacking : Union<OkBacking, ErrorBacking>
+        internal class ResultBacking : Union<OkBacking, Result.ErrorBacking>
         {
             public ResultBacking(OkBacking @case) : base(@case)
             {
             }
 
-            public ResultBacking(ErrorBacking @case) : base(@case)
+            public ResultBacking(Result.ErrorBacking @case) : base(@case)
             {
             } 
+            public static implicit operator ResultBacking(Result.ErrorBacking @case)
+            {
+                return new ResultBacking(@case);
+            }
         }
-                    
+         
         /*****************************/
         /********** Ok case **********/
         /*****************************/
+                        
 
         /********** Union wrapper constructor **********/
         public Result(Ok @case)
         {
             this.union = new OkBacking(@case);
         }        
-        
+
         /********** Case wrapper **********/
         public class Ok : IEquatable<Ok>
         {
@@ -321,13 +338,9 @@ namespace SharpToolkit.FunctionalExtensions
                 return this.Value.GetHashCode();
             }
 
-            public Result<T> ToUnion =>            
+            public Result<T> ToUnion() =>            
                 new Result<T>(this);
             
-            
-            public static implicit operator Result<T>(Ok @case) =>
-                new Result<T>(@case);
-
             public static bool operator == (Ok left, Ok right) =>
                 left.Equals(right);            
 
@@ -355,86 +368,39 @@ namespace SharpToolkit.FunctionalExtensions
         {
             return this.unionSafe.When(x => fn(x.Value));
         }
-            
-        /********************************/
-        /********** Error case **********/
-        /********************************/
 
-        /********** Union wrapper constructor **********/
-        public Result(Error @case)
+        /********** Ok cast operator **********/
+        public static implicit operator Result<T>(Ok @case)
         {
-            this.union = new ErrorBacking(@case);
-        }        
-        
-        /********** Case wrapper **********/
-        public class Error : IEquatable<Error>
-        {
-            public ErrorResult Value { get; }
-
-            public Error(ErrorResult value)
-            {
-                this.Value = value;
-            }
-
-            
-            /*********** Equals(object) ***********/
-            public override bool Equals(object obj)
-            {
-                if (obj is Error o)
-                    return this.Equals(o);
-
-                return false;
-            }
-
-            /*********** Equals(T) ***********/
-            public bool Equals(Error other)
-            {
-                return this.Value.Equals(other.Value);
-            }
-
-            public override int GetHashCode()
-            {
-            
-                return this.Value.GetHashCode();
-            }
-
-            public Result<T> ToUnion =>            
-                new Result<T>(this);
-            
-            
-            public static implicit operator Result<T>(Error @case) =>
-                new Result<T>(@case);
-
-            public static bool operator == (Error left, Error right) =>
-                left.Equals(right);            
-
-            public static bool operator != (Error left, Error right) =>
-                !left.Equals(right);
+            return new Result<T>(@case);
         }
 
-        /*********** Real case **********/
-        internal class ErrorBacking : Case<ResultBacking, Error>
+        /************************************/
+        /********** End of Ok case **********/
+        /************************************/
+            
+        /***************************************/
+        /********** Result.Error case **********/
+        /***************************************/
+                    
+        /********** Error result constructor **********/
+        public Result(Result.Error @case)
         {
-            public ErrorBacking(Error value) : base(value)
-            {
-                
-            }
+            this.union = new Result.ErrorBacking(@case);
         }
 
-        /********** Union case methods **********/
-
-        public void When(Action<Error> action)
+        /********** Result.Error cast operator **********/
+        public static implicit operator Result<T>(Result.Error @case)
         {
-            this.unionSafe.When(x => action(x.Value));
+            return new Result<T>(@case);
         }
 
-        public TResult When<TResult>(Func<Error, TResult> fn)
-        {
-            return this.unionSafe.When(x => fn(x.Value));
-        }
-
+        /**********************************************/
+        /********** End of Result.Error case **********/
+        /**********************************************/
+           
         /********** Match methods **********/
-        public void Match(Action<Ok> a0, Action<Error> a1)
+        public void Match(Action<Ok> a0, Action<Result.Error> a1)
         {
             this.unionSafe.Match(
                 x => a0(x.Value),
@@ -442,7 +408,7 @@ namespace SharpToolkit.FunctionalExtensions
             );
         }
 
-        public TResult Match<TResult>(Func<Ok, TResult> fn0, Func<Error, TResult> fn1)
+        public TResult Match<TResult>(Func<Ok, TResult> fn0, Func<Result.Error, TResult> fn1)
         {
             return this.unionSafe.Match(
                 x => fn0(x.Value),

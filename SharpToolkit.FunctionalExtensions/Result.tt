@@ -54,14 +54,18 @@ namespace SharpToolkit.FunctionalExtensions
                     typeArgument = "ResultBacking",
                     genericType = "",
                     hasValue = false,
-                    isGeneric = false
+                    isGeneric = false,
+                    skipDefinition = false,
+                    skipToUnion = false
                 },
                 new {
                     name = "Error",
                     typeArgument = "ResultBacking, ErrorResult",
                     genericType = "ErrorResult",
                     hasValue = true,
-                    isGeneric = false
+                    isGeneric = false,
+                    skipDefinition = false,
+                    skipToUnion = true
                 }
             }
         },
@@ -73,14 +77,18 @@ namespace SharpToolkit.FunctionalExtensions
                     typeArgument = "ResultBacking",
                     genericType = "T",
                     hasValue = true,
-                    isGeneric = true
+                    isGeneric = true,
+                    skipDefinition = false,
+                    skipToUnion = false
                 },
                 new {
-                    name = "Error",
+                    name = "Result.Error",
                     typeArgument = "ResultBacking, ErrorResult",
                     genericType = "ErrorResult",
                     hasValue = true,
-                    isGeneric = false
+                    isGeneric = false,
+                    skipDefinition = true,
+                    skipToUnion = true
                 }
             }
         }};
@@ -105,7 +113,7 @@ namespace SharpToolkit.FunctionalExtensions
         private ResultBacking MakeUnion()
         {
             if (this.union == null)
-                union = new ErrorBacking(new Error(new ErrorResult("Result created implicitly.")));
+                union = new Result.ErrorBacking(new Result.Error(new ErrorResult("Result created implicitly.")));
 
             return union;
         }
@@ -115,105 +123,120 @@ namespace SharpToolkit.FunctionalExtensions
         /*****************************************/
         /********** Union backing class **********/
         /*****************************************/
-        internal class ResultBacking : Union<OkBacking, ErrorBacking>
+        internal class ResultBacking : Union<OkBacking, Result.ErrorBacking>
         {
             public ResultBacking(OkBacking @case) : base(@case)
             {
             }
 
-            public ResultBacking(ErrorBacking @case) : base(@case)
+            public ResultBacking(Result.ErrorBacking @case) : base(@case)
             {
             } 
+<#      
+        // For the skipped error definition in generic result
+        foreach (var back in data.backs.Where(x => x.skipDefinition == true))
+        { #>
+            public static implicit operator ResultBacking(<#= back.name #>Backing @case)
+            {
+                return new ResultBacking(@case);
+            }
+<#
+        }
+        #>
         }
         <# 
 
         foreach (var back in data.backs)
         {
-            #>            
+            #> 
         /<#= GenerateStars(back.name.Length + 27) #>/
         /********** <#= back.name #> case **********/
         /<#= GenerateStars(back.name.Length + 27) #>/
+            <#
+            if (back.skipDefinition == false)
+            {
+            #>            
 
         /********** Union wrapper constructor **********/
         public Result(<#= back.name #> @case)
         {
             this.union = new <#= back.name #>Backing(@case);
         }        
-        
+
         /********** Case wrapper **********/
         public class <#= back.name #> : IEquatable<<#= back.name #>>
         {
-<#          if (back.hasValue)
-            {#>
+<#              if (back.hasValue)
+                {#>
             public <#= back.genericType #> Value { get; }
-<#          }#>
+<#              }#>
 
-<#          if (back.hasValue)
-            { #>
+<#              if (back.hasValue)
+                { #>
             public <#= back.name #>(<#= back.genericType #> value)
             {
                 this.Value = value;
             }
 
-<#          }
-            else 
-            { #>
+<#              }
+                else 
+                { #>
             public <#= back.name #>()
             {
                 
             }
-<#          } #>
+<#              } #>
             
             /*********** Equals(object) ***********/
             public override bool Equals(object obj)
             {
-<#          if (back.hasValue)
-            { #>
+<#              if (back.hasValue)
+                { #>
                 if (obj is <#= back.name #> o)
                     return this.Equals(o);
 
                 return false;
-<#          }
-            else { #>
+<#              }
+                else 
+                { #>
                 return obj is <#= back.name #>;
-<#          } #>
+<#              } #>
             }
 
             /*********** Equals(T) ***********/
             public bool Equals(<#= back.name #> other)
             {
-<#          if (back.hasValue)
-            { #>
+<#              if (back.hasValue)
+                { #>
                 return this.Value.Equals(other.Value);
-<#          } 
-            else
-            {#>
+<#              } 
+                else
+                {#>
                 // Type has no value
                 return true;
-<#          } #>
+<#              } #>
             }
 
             public override int GetHashCode()
             {
-<#          if (back.hasValue)                
-            { #>
+<#              if (back.hasValue)                
+                { #>
             
                 return this.Value.GetHashCode();
-<#          }
-            else
-            { #>
+<#              }
+                else
+                { #>
                 // Since the type has no value each instance is the same.
                 return 1;
-<#          } #>
+<#              } #>
             }
 
-            public <#= data.structName #> ToUnion =>            
+<#              if (back.skipToUnion == false)
+                { #>
+            public <#= data.structName #> ToUnion() =>            
                 new <#= data.structName #>(this);
+<#              } #>
             
-            
-            public static implicit operator <#= data.structName #>(<#= back.name #> @case) =>
-                new <#= data.structName #>(@case);
-
             public static bool operator == (<#= back.name #> left, <#= back.name #> right) =>
                 left.Equals(right);            
 
@@ -243,7 +266,29 @@ namespace SharpToolkit.FunctionalExtensions
         }
 <#
         
+            } // if (back.skipDefinition == false)
+            else
+            { #>
         
+        /********** Error result constructor **********/
+        public Result(<#= back.name #> @case)
+        {
+            this.union = new Result.ErrorBacking(@case);
+        }
+<#
+            }
+            #>
+
+        /********** <#= back.name #> cast operator **********/
+        public static implicit operator <#= data.structName #>(<#= back.name #> @case)
+        {
+            return new <#= data.structName #>(@case);
+        }
+
+        /<#= GenerateStars(back.name.Length + 34) #>/
+        /********** End of <#= back.name #> case **********/
+        /<#= GenerateStars(back.name.Length + 34) #>/
+           <#
         } // foreach case backing
 
 
