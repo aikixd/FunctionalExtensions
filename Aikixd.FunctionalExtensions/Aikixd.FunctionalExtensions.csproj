@@ -1,7 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageOutputPath>C:\Dev\LocalPackages\Aikixd.FunctionalExtensions\</PackageOutputPath>
+    <Version>1.0.6  </Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <Authors>Dmitriy Sorkin</Authors>
+    <Company />
+    <Product />
+    <Description>Adds algebraic datatypes: records and unions.</Description>
+    <PackageLicenseFile>content\LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/aikixd/FunctionalExtensions</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/aikixd/FunctionalExtensions</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -13,16 +24,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="LICENSE">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
     <PackageReference Include="System.Runtime" Version="4.3.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="System.Reflection.Emit.ILGeneration">
-      <HintPath>..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.netcore.app\2.0.0\ref\netcoreapp2.0\System.Reflection.Emit.ILGeneration.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="DiscriminatedUnions\Unions.cs">
