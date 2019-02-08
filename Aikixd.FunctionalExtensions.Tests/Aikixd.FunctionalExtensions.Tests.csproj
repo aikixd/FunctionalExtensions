@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharpToolkit.FunctionalExtensions\SharpToolkit.FunctionalExtensions.csproj" />
+    <ProjectReference Include="..\Aikixd.FunctionalExtensions\Aikixd.FunctionalExtensions.csproj" />
   </ItemGroup>
 
 </Project>
