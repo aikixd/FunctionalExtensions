@@ -1,10 +1,10 @@
-﻿using SharpToolkit.FunctionalExtensions.Utils;
+﻿using Aikixd.FunctionalExtensions.Utils;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace SharpToolkit.FunctionalExtensions.Records
+namespace Aikixd.FunctionalExtensions.Records
 {
     internal class TypeUtils<T>
         where T : class

@@ -1,10 +1,10 @@
-﻿using SharpToolkit.FunctionalExtensions.Utils;
+﻿using Aikixd.FunctionalExtensions.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
+namespace Aikixd.FunctionalExtensions.DiscriminatedUnions
 {
     internal class TypeUtils<TUnion, TCase>
         where TCase : Case<TUnion>

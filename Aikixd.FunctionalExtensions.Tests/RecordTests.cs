@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace SharpToolkit.FunctionalExtensions.Tests
+namespace Aikixd.FunctionalExtensions.Tests
 {
     [TestClass]
     public class RecordTests
@@ -235,7 +235,7 @@ namespace SharpToolkit.FunctionalExtensions.Tests
             var r = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1));
 
             Assert.AreEqual(
-                "{privateInt:3,SomeInt:1,SomeString:4,AnotherInt:2,privateFieldInt:5,Rec:{One:1,Two:2},List:System.Collections.Generic.List`1[System.Int32],equality:SharpToolkit.FunctionalExtensions.Tests.RecordTests+EqualityClass}",
+                "{privateInt:3,SomeInt:1,SomeString:4,AnotherInt:2,privateFieldInt:5,Rec:{One:1,Two:2},List:System.Collections.Generic.List`1[System.Int32],equality:Aikixd.FunctionalExtensions.Tests.RecordTests+EqualityClass}",
                 r.ToString().Replace(" ", "").Replace("\n", ""));
         }
 

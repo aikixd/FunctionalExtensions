@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharpToolkit.FunctionalExtensions.DiscriminatedUnions;
+using Aikixd.FunctionalExtensions.DiscriminatedUnions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace SharpToolkit.FunctionalExtensions.Tests
+namespace Aikixd.FunctionalExtensions.Tests
 {
     [TestClass]
     public class UnionTests

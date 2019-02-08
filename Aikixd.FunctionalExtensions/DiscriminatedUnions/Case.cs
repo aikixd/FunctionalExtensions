@@ -1,9 +1,9 @@
-﻿using SharpToolkit.FunctionalExtensions.DiscriminatedUnions;
+﻿using Aikixd.FunctionalExtensions.DiscriminatedUnions;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharpToolkit.FunctionalExtensions
+namespace Aikixd.FunctionalExtensions
 {
     public abstract class Case { }
 

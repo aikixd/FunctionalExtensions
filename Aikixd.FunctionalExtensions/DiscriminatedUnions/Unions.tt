@@ -5,9 +5,9 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
 using System;
-using SharpToolkit.FunctionalExtensions.DiscriminatedUnions;
+using Aikixd.FunctionalExtensions.DiscriminatedUnions;
 
-namespace SharpToolkit.FunctionalExtensions
+namespace Aikixd.FunctionalExtensions
 {
 
 <#
@@ -175,7 +175,7 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
         <#
            }
         #> 
-            throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
+            throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
         }
         
         public void Match(<#= 
@@ -217,7 +217,7 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
         <#
         }
         #> 
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
         }
 
         public void Match(<#= 

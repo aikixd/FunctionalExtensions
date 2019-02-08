@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
+namespace Aikixd.FunctionalExtensions.DiscriminatedUnions
 {
     public class InvalidUnionDefinitionException : Exception
     {

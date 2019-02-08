@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharpToolkit.FunctionalExtensions.DiscriminatedUnions
+namespace Aikixd.FunctionalExtensions.DiscriminatedUnions
 {
     abstract class CaseSelection<TCase> : IEquatable<CaseSelection<TCase>>
         where TCase : Case

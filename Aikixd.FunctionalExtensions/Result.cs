@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Linq;
 
-namespace SharpToolkit.FunctionalExtensions
+namespace Aikixd.FunctionalExtensions
 {
     public class ErrorResult
     {

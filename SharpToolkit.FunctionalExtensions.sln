@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpToolkit.FunctionalExtensions", "SharpToolkit.FunctionalExtensions\SharpToolkit.FunctionalExtensions.csproj", "{BF0D8784-4C8F-4191-9780-C1A31B243871}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aikixd.FunctionalExtensions", "Aikixd.FunctionalExtensions\Aikixd.FunctionalExtensions.csproj", "{BF0D8784-4C8F-4191-9780-C1A31B243871}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpToolkit.FunctionalExtensions.Tests", "SharpToolkit.FunctionalExtensions.Tests\SharpToolkit.FunctionalExtensions.Tests.csproj", "{7C9E0A24-760B-41BD-A635-9F480B4A7277}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aikixd.FunctionalExtensions.Tests", "Aikixd.FunctionalExtensions.Tests\Aikixd.FunctionalExtensions.Tests.csproj", "{7C9E0A24-760B-41BD-A635-9F480B4A7277}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

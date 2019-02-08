@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharpToolkit.FunctionalExtensions
+namespace Aikixd.FunctionalExtensions
 {
     public class Valid<T> : Case<Validated<T>, T>
         where T : IRecord

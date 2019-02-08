@@ -1,7 +1,7 @@
 ﻿using System;
-using SharpToolkit.FunctionalExtensions.DiscriminatedUnions;
+using Aikixd.FunctionalExtensions.DiscriminatedUnions;
 
-namespace SharpToolkit.FunctionalExtensions
+namespace Aikixd.FunctionalExtensions
 {
 
   
@@ -62,7 +62,7 @@ namespace SharpToolkit.FunctionalExtensions
             TResult r = default;
 		    if (this.case1.Do(fn1, out r)) return r;
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
         }
 
         public void Match(Action<T1> action1)
@@ -157,7 +157,7 @@ namespace SharpToolkit.FunctionalExtensions
 		    if (this.case1.Do(fn1, out r)) return r;
             if (this.case2.Do(fn2, out r)) return r;
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
         }
 
         public void Match(Action<T1> action1, Action<T2> action2)
@@ -281,7 +281,7 @@ namespace SharpToolkit.FunctionalExtensions
             if (this.case2.Do(fn2, out r)) return r;
             if (this.case3.Do(fn3, out r)) return r;
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
         }
 
         public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3)
@@ -436,7 +436,7 @@ namespace SharpToolkit.FunctionalExtensions
             if (this.case3.Do(fn3, out r)) return r;
             if (this.case4.Do(fn4, out r)) return r;
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
         }
 
         public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4)
@@ -624,7 +624,7 @@ namespace SharpToolkit.FunctionalExtensions
             if (this.case4.Do(fn4, out r)) return r;
             if (this.case5.Do(fn5, out r)) return r;
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
         }
 
         public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5)
@@ -847,7 +847,7 @@ namespace SharpToolkit.FunctionalExtensions
             if (this.case5.Do(fn5, out r)) return r;
             if (this.case6.Do(fn6, out r)) return r;
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
         }
 
         public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6)
@@ -1107,7 +1107,7 @@ namespace SharpToolkit.FunctionalExtensions
             if (this.case6.Do(fn6, out r)) return r;
             if (this.case7.Do(fn7, out r)) return r;
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/SharpToolkit/FunctionalExtensions.");
+              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
         }
 
         public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7)

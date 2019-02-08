@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharpToolkit.FunctionalExtensions.Tests
+namespace Aikixd.FunctionalExtensions.Tests
 {
     [TestClass]
     public class ResultTests

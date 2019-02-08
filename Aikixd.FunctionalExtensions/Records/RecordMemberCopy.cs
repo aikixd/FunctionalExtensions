@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace SharpToolkit.FunctionalExtensions.Records
+namespace Aikixd.FunctionalExtensions.Records
 {
     public class RecordMemberCopy<TRecord> : IEnumerable<(MemberInfo member, Func<TRecord, object> fn)>
     {

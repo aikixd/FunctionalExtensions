@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace SharpToolkit.FunctionalExtensions.Utils
+namespace Aikixd.FunctionalExtensions.Utils
 {
     class IlHelpers
     {

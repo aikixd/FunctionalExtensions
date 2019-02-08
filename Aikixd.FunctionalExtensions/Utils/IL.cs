@@ -5,11 +5,11 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-using SharpToolkit.FunctionalExtensions.DiscriminatedUnions;
+using Aikixd.FunctionalExtensions.DiscriminatedUnions;
 using System.Reflection.Emit;
 using System.Runtime.Serialization;
 
-namespace SharpToolkit.FunctionalExtensions.Utils
+namespace Aikixd.FunctionalExtensions.Utils
 {
     internal class IL
     {
