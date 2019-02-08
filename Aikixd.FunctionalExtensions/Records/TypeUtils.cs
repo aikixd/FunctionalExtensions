@@ -1,6 +1,7 @@
 ﻿using Aikixd.FunctionalExtensions.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
@@ -13,14 +14,31 @@ namespace Aikixd.FunctionalExtensions.Records
 
         static TypeUtils()
         {
+            try
+            {
+
+            var recordProxy = IL.GenerateRecordProxy<T>();
+            var fieldCompare = IL.GenerateFieldsCompare<T>();
+            var getHashCode = IL.GenerateGetHashCode<T>();
+            var toString = IL.GenerateToString<T>();
+            var recordCopy = IL.GenerateRecordCopy<T>();
+            var recordFieldSetMap = IL.GenerateRecordFieldsSetMap<T>();
+
             Instance = new TypeUtils<T>(
-                IL.GenerateRecordProxy<T>(),
-                IL.GenerateFieldsCompare<T>(),
-                IL.GenerateGetHashCode<T>(),
-                IL.GenerateToString<T>(),
-                IL.GenerateRecordCopy<T>(),
-                IL.GenerateRecordFieldsSetMap<T>()
-                );
+                recordProxy,
+                fieldCompare,
+                getHashCode,
+                toString,
+                recordCopy,
+                recordFieldSetMap);
+            }
+
+            catch (Exception e)
+            {
+                Debugger.Break();
+            }
+
+            Debug.Assert(Instance != null);
         }       
 
         private TypeUtils(

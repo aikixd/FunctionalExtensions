@@ -69,7 +69,7 @@ namespace Aikixd.FunctionalExtensions.Utils
                     Expression.AddAssign(hash, 
                         Expression.Call(
                             Expression.Field(param, fieldInfo), 
-                            fieldInfo.FieldType.GetMethod("GetHashCode", new Type[] { }))));
+                            typeof(object).GetMethod("GetHashCode", new Type[] { }))));
 
             var block =
                 Expression
@@ -153,7 +153,7 @@ namespace Aikixd.FunctionalExtensions.Utils
 
             Expression getToStringCall(FieldInfo nfo)
             {
-                var prettyToString = nfo.FieldType.GetMethod("ToString", new[] { typeof(int) });
+                var prettyToString = typeof(object).GetMethod("ToString", new[] { typeof(int) });
 
                 if (prettyToString != null)
                     return Expression.Call(
@@ -163,7 +163,7 @@ namespace Aikixd.FunctionalExtensions.Utils
 
                 return Expression.Call(
                     Expression.Field(param, nfo),
-                    nfo.FieldType.GetMethod("ToString", new Type[] { }));
+                    typeof(object).GetMethod("ToString", new Type[] { }));
             }
 
             Expression StringConcat2(Expression a, Expression b)

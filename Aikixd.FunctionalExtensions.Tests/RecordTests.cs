@@ -45,6 +45,7 @@ namespace Aikixd.FunctionalExtensions.Tests
                 return new Result.Error(new ErrorResult("Validation failed.", new[] { ("Reason", $"{this.Value} is not even.") }));
             }
         }
+        
 
         public class InnerRecord : Record<InnerRecord>
         {
@@ -72,6 +73,7 @@ namespace Aikixd.FunctionalExtensions.Tests
             public InnerRecord Rec { get; }
             public List<int> List { get; }
             public EqualityClass equality { get; }
+            public IEnumerable<int> Enumerable { get; }
 
 
             public SomeRecord(
@@ -82,7 +84,8 @@ namespace Aikixd.FunctionalExtensions.Tests
                 int privateFieldInt,
                 InnerRecord rec,
                 List<int> list,
-                EqualityClass equality)
+                EqualityClass equality,
+                IEnumerable<int> enumerable)
             {
                 this.SomeInt = someInt;
                 this.SomeString = SomeString;
@@ -92,6 +95,7 @@ namespace Aikixd.FunctionalExtensions.Tests
                 this.Rec = rec;
                 this.List = list;
                 this.equality = equality;
+                this.Enumerable = enumerable;
             }
 
             public int GetHashCodeTest()
@@ -108,6 +112,7 @@ namespace Aikixd.FunctionalExtensions.Tests
                     i += this.Rec.GetHashCode();
                     i += this.List.GetHashCode();
                     i += this.equality.GetHashCode();
+                    i += this.Enumerable.GetHashCode();
                 }
 
                 return i;
@@ -120,8 +125,8 @@ namespace Aikixd.FunctionalExtensions.Tests
             var list = new List<int>();
             var eqClass = new EqualityClass(1);
 
-            var r1 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass);
-            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass);
+            var r1 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
+            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
 
             Assert.IsTrue(r1.Equals(r2));
             Assert.IsTrue(r1 == r2);
@@ -133,8 +138,8 @@ namespace Aikixd.FunctionalExtensions.Tests
             var list = new List<int>();
             var eqClass = new EqualityClass(1);
 
-            var r1 = new SomeRecord(1, "1", 2, 2, 4, new InnerRecord(1, 2), list, eqClass);
-            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass);
+            var r1 = new SomeRecord(1, "1", 2, 2, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
+            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
 
             Assert.IsFalse(r1.Equals(r2));
             Assert.IsTrue(r1 != r2);
@@ -146,8 +151,8 @@ namespace Aikixd.FunctionalExtensions.Tests
             var list = new List<int>();
             var eqClass = new EqualityClass(1);
 
-            var r1 = new SomeRecord(1, "4", 2, 3, 4, new InnerRecord(1, 2), list, eqClass);
-            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass);
+            var r1 = new SomeRecord(1, "4", 2, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
+            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
 
             Assert.IsFalse(r1.Equals(r2));
             Assert.IsTrue(r1 != r2);
@@ -159,8 +164,8 @@ namespace Aikixd.FunctionalExtensions.Tests
             var list = new List<int>();
             var eqClass = new EqualityClass(1);
 
-            var r1 = new SomeRecord(1, "4", 4, 3, 4, new InnerRecord(1, 2), list, eqClass);
-            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass);
+            var r1 = new SomeRecord(1, "4", 4, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
+            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
 
             Assert.IsFalse(r1.Equals(r2));
             Assert.IsTrue(r1 != r2);
@@ -172,8 +177,8 @@ namespace Aikixd.FunctionalExtensions.Tests
             var list = new List<int>();
             var eqClass = new EqualityClass(1);
 
-            var r1 = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, eqClass);
-            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass);
+            var r1 = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
+            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
 
             Assert.IsFalse(r1.Equals(r2));
             Assert.IsTrue(r1 != r2);
@@ -185,8 +190,8 @@ namespace Aikixd.FunctionalExtensions.Tests
             var list = new List<int>();
             var eqClass = new EqualityClass(1);
 
-            var r1 = new SomeRecord(1, "4", 2, 3, 4, new InnerRecord(1, 4), list, eqClass);
-            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass);
+            var r1 = new SomeRecord(1, "4", 2, 3, 4, new InnerRecord(1, 4), list, eqClass, Enumerable.Empty<int>());
+            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
 
             Assert.IsFalse(r1.Equals(r2));
             Assert.IsTrue(r1 != r2);
@@ -198,8 +203,8 @@ namespace Aikixd.FunctionalExtensions.Tests
             var list = new List<int>();
             var eqClass = new EqualityClass(1);
 
-            var r1 = new SomeRecord(1, "4", 2, 3, 4, new InnerRecord(1, 2), list, eqClass);
-            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), new List<int>(), eqClass);
+            var r1 = new SomeRecord(1, "4", 2, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
+            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), new List<int>(), eqClass, Enumerable.Empty<int>());
 
             Assert.IsFalse(r1.Equals(r2));
             Assert.IsTrue(r1 != r2);
@@ -210,8 +215,8 @@ namespace Aikixd.FunctionalExtensions.Tests
         {
             var list = new List<int>();
 
-            var r1 = new SomeRecord(1, "4", 2, 3, 4, new InnerRecord(1, 2), list, new EqualityClass(1));
-            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, new EqualityClass(2));
+            var r1 = new SomeRecord(1, "4", 2, 3, 4, new InnerRecord(1, 2), list, new EqualityClass(1), Enumerable.Empty<int>());
+            var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, new EqualityClass(2), Enumerable.Empty<int>());
 
             Assert.IsFalse(r1.Equals(r2));
             Assert.IsTrue(r1 != r2);
@@ -222,7 +227,7 @@ namespace Aikixd.FunctionalExtensions.Tests
         {
             var list = new List<int>();
 
-            var r = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1));
+            var r = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1), Enumerable.Empty<int>());
 
             Assert.AreEqual(r.GetHashCode(), r.GetHashCodeTest());
         }
@@ -232,10 +237,10 @@ namespace Aikixd.FunctionalExtensions.Tests
         {
             var list = new List<int>();
 
-            var r = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1));
+            var r = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1), Enumerable.Empty<int>());
 
             Assert.AreEqual(
-                "{privateInt:3,SomeInt:1,SomeString:4,AnotherInt:2,privateFieldInt:5,Rec:{One:1,Two:2},List:System.Collections.Generic.List`1[System.Int32],equality:Aikixd.FunctionalExtensions.Tests.RecordTests+EqualityClass}",
+                "{privateInt:3,SomeInt:1,SomeString:4,AnotherInt:2,privateFieldInt:5,Rec:{One:1,Two:2},List:System.Collections.Generic.List`1[System.Int32],equality:Aikixd.FunctionalExtensions.Tests.RecordTests+EqualityClass,Enumerable:System.Int32[]}",
                 r.ToString().Replace(" ", "").Replace("\n", ""));
         }
 
@@ -244,7 +249,7 @@ namespace Aikixd.FunctionalExtensions.Tests
         {
             var list = new List<int>();
 
-            var r1 = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1));
+            var r1 = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1), Enumerable.Empty<int>());
 
             var r2 = r1.Copy(x => x);
 
@@ -257,7 +262,7 @@ namespace Aikixd.FunctionalExtensions.Tests
         {
             var list = new List<int>();
 
-            var r1 = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1));
+            var r1 = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1), Enumerable.Empty<int>());
 
             var r2 = r1.Copy(x =>
                 x
@@ -277,7 +282,7 @@ namespace Aikixd.FunctionalExtensions.Tests
         {
             var list = new List<int>();
 
-            var r1 = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1));
+            var r1 = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1), Enumerable.Empty<int>());
 
             var r2 = r1.Copy(x =>
                 x.With(
