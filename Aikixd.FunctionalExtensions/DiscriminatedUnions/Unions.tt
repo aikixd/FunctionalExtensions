@@ -28,33 +28,18 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
     // Class declaration
 #>  
     public abstract class <#= className #> : IEquatable<<#= className #>>
-<# 
-    // Generic contraints
-    foreach (var n in argNames)
     {
-#>
-        where <#= n #> : Case
-<#  } #>
-    {
-    
-<#
-    // Class fileds
-    for (var i = 1; i <= argNames.Length; i += 1)
-    {
-#>
-        CaseSelection<#= "<" + argNames[i - 1] + ">" #> case<#= i #>;
-<#
-    }
-#>
+        
+        private readonly object value;
         
 <#
     // Constructors
     foreach (var n in argNames)
     {
 #>
-        public Union(<#= n #> @case)
+        public Union(<#= n #> value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
 <#
     }
@@ -66,19 +51,18 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
     #>
         public bool Equals(<#= className #> other)
         {
-            return 
-<# 
-    for (var i = 1; i <= argNames.Length; i += 1)
-    {
-        #>
-                this.case<#= i #>.Equals(other.case<#= i #>)<#
-        if (i != argNames.Length)
-        {
-            #> && 
-<#
+            if (other is null)
+                return false;
+            return this.value.Equals(other.value);
         }
-    }
-#>;
+
+<#
+    // GetHashCode method
+
+    #>
+        public override int GetHashCode()
+        {
+            return this.value.GetHashCode();
         }
 
 <#
@@ -91,7 +75,8 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
 
             return false;
         }
-    <#
+
+<#
     // Operators
     #>
         public static bool operator == (<#= className #> left, <#= className #> right)
@@ -103,104 +88,56 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
         {
             return !left.Equals(right);
         }
-    <#
-    // Set methods
-    for (var i = 1; i <= argNames.Length; i += 1)
-    {
-#>
-        private void set(<#= argNames[i - 1] #> @case)
-        {
-        <#
-            for (var j = 1; j <= argNames.Length; j += 1)
-            {
-        #>    this.case<#= j #> = <#= 
-                i == j ?
-                "new SelectedCase<" + argNames[j - 1] + ">(@case);" :
-                "new UnselectedCase<" + argNames[j - 1] + ">();"
-            #>
-        <#
-            }
-        #>
-            
-        }
-<#
-    }
-#>
 
 <#
     // When methods
     for (var i = 1; i <= argNames.Length; i += 1)
     {
+        var curTypeArg = argNames[i - 1];
 #>
-        public void When(Action<#= "<" + argNames[i - 1] + ">" #> action)
+        public bool When(Action<#= "<" + curTypeArg + ">" #> action)
         {
-            this.case<#= i #>.Do(action.AsFunc(), out var r);
+            if (this.value is <#= curTypeArg #> x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
         }
 
-        public TResult When<TResult>(Func<#= "<" + argNames[i - 1] + ", TResult>" #> fn)
+        public bool When(Action<#= "<" + curTypeArg + ">" #> action, Action fallback)
         {
-            this.case<#= i #>.Do(fn, out var r);
+            if (this.value is <#= curTypeArg #> x)
+            {
+                action(x);
+                return true;
+            }
 
-            return r;
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<#= "<" + curTypeArg + ", TResult>" #> fn, TResult @default)
+        {
+            if (this.value is <#= curTypeArg #> x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<#= "<" + curTypeArg + ", TResult>" #> fn, Func<TResult> fallback)
+        {
+            if (this.value is <#= argNames[i - 1] #> x)
+                return fn(x);
+
+            return fallback();
         }
 <#
     }
-#>
 
-<#
     // Match methods
-    var permutatedSwtichLimit = 0;
-    
-	// When the number of type arguments is less then the limit, create all switch permutations
-    if (argumentCount <= permutatedSwtichLimit)
-    {
-        var argNamesSlice = argNames.Take(permutatedSwtichLimit).Select((x, i) => new { str = x, i = i + 1 });
-        var argNamesPermutations = GetPermutations(argNamesSlice, argNamesSlice.Count());
-
-    
-        foreach (var p in argNamesPermutations)
-        {
 #>
-        public TResult Match<TResult>(<#= 
-            p
-            .Select(x => "Func<" + x.str + ", TResult> fn" + x.i)
-            .Aggregate((aggr, cur) => aggr + ", " + cur)
-        #>)
-        {
-            TResult r = default;  
-        <# for (var i = 1; i <= argNames.Length; i += 1)
-           {
-        #>              
-            if (this.case<#= i #>.Do(fn<#= i #>, out r)) return r;            
-        <#
-           }
-        #> 
-            throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
-        }
-        
-        public void Match(<#= 
-            p
-            .Select(x => "Action<" + x.str + "> action" + x.i)
-            .Aggregate((aggr, cur) => aggr + ", " + cur)
-        #>)
-        {
-            int r = default;
-        <# for (var i = 1; i <= argNames.Length; i += 1)
-           {
-        #>    this.case<#= i #>.Do(action<#= i #>.AsFunc(), out r);
-        <#
-           }
-        #>}
-
-        
-<#
-        }
-    } // if (argumentCount <= permutatedSwtichLimit)
-
-	// When the number of type arguments is more then the limit, create only one overload
-    else
-    {
-        #>
 
         public TResult Match<TResult>(<#= 
             argNames
@@ -209,36 +146,56 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
             .Aggregate((aggr, cur) => aggr + ", " + cur)
         #>)
         {  
-            TResult r = default;
+            switch (this.value)
+            {
 		<#
         for (var i = 1; i <= argNames.Length; i += 1)
         {
-        #>    if (this.case<#= i #>.Do(fn<#= i #>, out r)) return r;
+        #>        case <#= argNames[i - 1] #> x: return fn<#= i #>(x);
         <#
         }
         #> 
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
-        public void Match(<#= 
+        public void Match<TResult>(<#= 
             argNames
             .Select((x, i) => new { str = x, i = i + 1 })
             .Select(x => "Action<" + x.str + "> action" + x.i)
             .Aggregate((aggr, cur) => aggr + ", " + cur)
         #>)
-        { 
-            int r = default;
+        {  
+            switch (this.value)
+            {
 		<#
         for (var i = 1; i <= argNames.Length; i += 1)
         {
-        #>    this.case<#= i #>.Do(action<#= i #>.AsFunc(), out r);
+        #>        case <#= argNames[i - 1] #> x: action<#= i #>(x); break;
         <#
         }
-        #>}
+        #> 
+            }
+            
+            throw new InvalidUnionStateException();
+        }
 
-        
+        <#
+        for (var i = 1; i <= argNames.Length; i += 1)
+        {
+            var typeArgName = argNames[i - 1];
+        #>
+
+        public static implicit operator <#= className #>(<#= typeArgName #> obj)
+        {
+            return TypeUtils<<#= className #>, <#= typeArgName #>>.Instance.CastFn(obj);
+        }
+        <#
+        }
+        #> 
 <#
-    } // else
+    
 
 
 #>    }

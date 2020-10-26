@@ -13,7 +13,7 @@ namespace Aikixd.FunctionalExtensions.Tests
         public class Email { }
         public class Phone { }
 
-        public class ContactInfo : Union<ContactInfo.Email, ContactInfo.Phone>
+        public class ContactInfo : Union<Email, Phone>
         {
             public ContactInfo(Email @case) : base(@case)
             {
@@ -21,20 +21,6 @@ namespace Aikixd.FunctionalExtensions.Tests
 
             public ContactInfo(Phone @case) : base(@case)
             {
-            }
-
-            public class Email : Case<ContactInfo, UnionTests.Email>
-            {
-                public Email(UnionTests.Email value) : base(value)
-                {
-                }
-            }
-
-            public class Phone : Case<ContactInfo, UnionTests.Phone>
-            {
-                public Phone(UnionTests.Phone value) : base(value)
-                {
-                }
             }
 
         }
@@ -49,8 +35,6 @@ namespace Aikixd.FunctionalExtensions.Tests
             Option<int> b = new Option<int>.None();
 
             Assert.AreNotSame(a, b);
-
-            Debugger.Break();
         }
 
         [TestMethod]
@@ -58,15 +42,16 @@ namespace Aikixd.FunctionalExtensions.Tests
         {
             Option<int> someNum = new Option<int>.Some(5);
 
-            var r = someNum.Match(
+            var someNumResult = someNum.Match(
                 some => true,
                 none => false);
 
-            ContactInfo ci = new ContactInfo.Email(new Email());
+            ContactInfo ci = new Email(new Email());
 
-            var o = ci.Match(email => (object)email.Value, phone => phone.Value);
+            var contactInfoResult = ci.Match(email => (object)email, phone => phone);
 
-            Assert.IsInstanceOfType(o, typeof(Email));
+            Assert.AreEqual(someNumResult, true);
+            Assert.IsInstanceOfType(contactInfoResult, typeof(Email));
         }
 
         [TestMethod]
@@ -101,7 +86,6 @@ namespace Aikixd.FunctionalExtensions.Tests
 
             Assert.IsFalse(none1.Equals(some1));
             Assert.IsFalse(some1.Equals(none1));
-            Assert.IsFalse(some1 == none1);
         }
 
         [TestMethod]

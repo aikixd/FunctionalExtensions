@@ -25,21 +25,6 @@ namespace Aikixd.FunctionalExtensions
             utils = TypeUtils<T>.Instance;
         }
 
-        public virtual Result Validate()
-        {
-            return new Result.Ok();
-        }
-
-        public static Validated<T> Validate(T record)
-        {
-            return
-                record
-                .Validate()
-                .Match<Validated<T>>(
-                    (Result.Ok x) => new Valid<T>(record),
-                    (Result.Error x) => new Validated<T>.Invalid(new RecordValidationError<T>(record, x.Value)));
-        }
-
         public T Copy(Func<RecordMemberCopy<T>, RecordMemberCopy<T>> alterationsFn)
         {
             var r = utils.CopyFn((T)this);

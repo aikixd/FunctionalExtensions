@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageOutputPath>C:\Dev\LocalPackages\Aikixd.FunctionalExtensions\</PackageOutputPath>
-    <Version>1.0.6  </Version>
+    <Version>1.0.7</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <Authors>Dmitriy Sorkin</Authors>
@@ -16,21 +16,15 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>Enable</Nullable>
+    <CodeAnalysisRuleSet>$(SolutionDir)main.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
-
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <LangVersion>7.1</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>7.1</LangVersion>
-  </PropertyGroup>
-
+  
   <ItemGroup>
     <Content Include="LICENSE">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -43,17 +37,11 @@
     <PackageReference Include="System.Runtime" Version="4.3.0" />
   </ItemGroup>
 
-
   <ItemGroup>
     <Compile Update="DiscriminatedUnions\Unions.cs">
       <DependentUpon>Unions.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Update="Result.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Result.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -61,10 +49,6 @@
     <None Update="DiscriminatedUnions\Unions.tt">
       <LastGenOutput>Unions.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
-    </None>
-    <None Update="Result.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Result.cs</LastGenOutput>
     </None>
   </ItemGroup>
 

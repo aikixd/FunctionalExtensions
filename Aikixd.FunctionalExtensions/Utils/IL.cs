@@ -249,14 +249,14 @@ namespace Aikixd.FunctionalExtensions.Utils
                 GetMembers<T>()
                 .Where(x => x.MemberType == MemberTypes.Field || x.MemberType == MemberTypes.Property)
                 .Partition(x => x.MemberType == MemberTypes.Property)
-                .Do(x => (
+                .To(x => (
                     x.trues.Cast<PropertyInfo>().ToArray(), 
                     x.falses.Cast<FieldInfo>().ToArray()));
 
             var (autoFields, realFields) =
                 allFields
                 .Partition(x => x.CustomAttributes.Any(y => y.AttributeType == typeof(CompilerGeneratedAttribute)))
-                .Do(x => (x.trues.ToArray(), x.falses.ToArray()));
+                .To(x => (x.trues.ToArray(), x.falses.ToArray()));
 
             var autoProps =
                 autoFields
@@ -305,20 +305,22 @@ namespace Aikixd.FunctionalExtensions.Utils
                     x => Expression.Lambda<Action<T, object>>(x.expression, target, value).Compile());
         }
 
-        internal static Func<TCase, TUnion> GenerateCaseCast<TUnion, TCase>(Type caseType)
-            where TCase : Case<TUnion>
+        internal static Func<TCase, TUnion> GenerateCaseCast<TUnion, TCase>()
         {
-            var constr = typeof(TUnion).GetConstructor(new[] { caseType });
+            var constr = typeof(TUnion).GetConstructor(new[] { typeof(TCase) });
 
             if (constr == null)
-                throw new InvalidUnionDefinitionException($"Union of type {typeof(TUnion).Namespace}.{typeof(TUnion).Name} lack constructor for case of type {caseType.Namespace}.{caseType.Name}. Ensure that the union has constructor for each possible case.");
+                throw new InvalidUnionDefinitionException(
+                    $"Union of type {typeof(TUnion).Namespace}.{typeof(TUnion).Name} lack constructor " +
+                    $"for case of type {typeof(TCase).Namespace}.{typeof(TCase).Name}. " +
+                    $"Ensure that the union has constructor for each possible case.");
 
             var @case = Expression.Parameter(typeof(TCase), "case");
 
             var constructorCall =
                 Expression.New(
                     constr, 
-                    Expression.Convert(@case, caseType));
+                    Expression.Convert(@case, typeof(TCase)));
 
             return Expression.Lambda<Func<TCase, TUnion>>(constructorCall, @case).Compile();
         }

@@ -22,11 +22,23 @@ namespace Aikixd.FunctionalExtensions
         {
             return (collection.Where(predicate), collection.Where(x => predicate(x) == false));
         }
+    }
 
-        public static U Do<T, U>(this T obj, Func<T, U> fn)
+    public static class ObjectExtensions
+    {
+        public static U To<T, U>(this T obj, Func<T, U> fn)
         {
             return fn(obj);
         }
 
+        public static void To<T>(this T obj, Action<T> action)
+        {
+            action(obj);
+        }
+
+        public static IEnumerable<T> Yield<T>(this T obj)
+        {
+            yield return obj;
+        }
     }
 }

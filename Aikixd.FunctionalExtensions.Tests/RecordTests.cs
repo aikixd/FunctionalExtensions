@@ -28,24 +28,6 @@ namespace Aikixd.FunctionalExtensions.Tests
             }
         }
 
-        public class EvenNumber : Record<EvenNumber>
-        {
-            public int Value { get; }
-
-            public EvenNumber(int i)
-            {
-                this.Value = i;
-            }
-
-            public override Result Validate()
-            {
-                if (this.Value % 2 == 0)
-                    return new Result.Ok();
-
-                return new Result.Error(new ErrorResult("Validation failed.", new[] { ("Reason", $"{this.Value} is not even.") }));
-            }
-        }
-        
 
         public class InnerRecord : Record<InnerRecord>
         {
@@ -297,26 +279,6 @@ namespace Aikixd.FunctionalExtensions.Tests
             Assert.AreNotEqual(r1.Rec, r2.Rec);
 
             Assert.AreEqual(10, r2.Rec.One);
-        }
-
-        [TestMethod]
-        public void Record_Validation()
-        {
-            var v1 = EvenNumber.Validate(new EvenNumber(4));
-            var v2 = EvenNumber.Validate(new EvenNumber(3));
-
-            v1.Match(
-                ok => {  },
-                err => { Assert.Fail(); });
-
-            v2.Match(
-                ok => { Assert.Fail(); },
-                err => {
-                    Assert.AreEqual("Validation failed.", err.Value.Error.Message);
-                    Assert.AreEqual(1, err.Value.Error.Data.Count());
-                    Assert.AreEqual("Reason", err.Value.Error.Data.First().Key);
-                    Assert.AreEqual("3 is not even.", err.Value.Error.Data.First().Value);
-                });
         }
     }
 }

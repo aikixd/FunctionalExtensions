@@ -16,21 +16,20 @@ namespace Aikixd.FunctionalExtensions.Records
         {
             try
             {
+                var recordProxy = IL.GenerateRecordProxy<T>();
+                var fieldCompare = IL.GenerateFieldsCompare<T>();
+                var getHashCode = IL.GenerateGetHashCode<T>();
+                var toString = IL.GenerateToString<T>();
+                var recordCopy = IL.GenerateRecordCopy<T>();
+                var recordFieldSetMap = IL.GenerateRecordFieldsSetMap<T>();
 
-            var recordProxy = IL.GenerateRecordProxy<T>();
-            var fieldCompare = IL.GenerateFieldsCompare<T>();
-            var getHashCode = IL.GenerateGetHashCode<T>();
-            var toString = IL.GenerateToString<T>();
-            var recordCopy = IL.GenerateRecordCopy<T>();
-            var recordFieldSetMap = IL.GenerateRecordFieldsSetMap<T>();
-
-            Instance = new TypeUtils<T>(
-                recordProxy,
-                fieldCompare,
-                getHashCode,
-                toString,
-                recordCopy,
-                recordFieldSetMap);
+                Instance = new TypeUtils<T>(
+                    recordProxy,
+                    fieldCompare,
+                    getHashCode,
+                    toString,
+                    recordCopy,
+                    recordFieldSetMap);
             }
 
             catch (Exception e)

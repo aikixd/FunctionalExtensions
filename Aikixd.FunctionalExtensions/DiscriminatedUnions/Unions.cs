@@ -6,20 +6,25 @@ namespace Aikixd.FunctionalExtensions
 
   
     public abstract class Union<T1> : IEquatable<Union<T1>>
-        where T1 : Case
     {
-    
-        CaseSelection<T1> case1;
         
-        public Union(T1 @case)
+        private readonly object value;
+        
+        public Union(T1 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
         
         public bool Equals(Union<T1> other)
         {
-            return 
-                this.case1.Equals(other.case1);
+            if (other is null)
+                return false;
+            return this.value.Equals(other.value);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.value.GetHashCode();
         }
 
         public override bool Equals(object other)
@@ -29,7 +34,8 @@ namespace Aikixd.FunctionalExtensions
 
             return false;
         }
-            public static bool operator == (Union<T1> left, Union<T1> right)
+
+        public static bool operator == (Union<T1> left, Union<T1> right)
         {
             return left.Equals(right);
         }
@@ -38,64 +44,100 @@ namespace Aikixd.FunctionalExtensions
         {
             return !left.Equals(right);
         }
-            private void set(T1 @case)
+
+        public bool When(Action<T1> action)
         {
-            this.case1 = new SelectedCase<T1>(@case);
-                    
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
         }
 
-        public void When(Action<T1> action)
+        public bool When(Action<T1> action, Action fallback)
         {
-            this.case1.Do(action.AsFunc(), out var r);
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
         }
 
-        public TResult When<TResult>(Func<T1, TResult> fn)
+        public TResult When<TResult>(Func<T1, TResult> fn, TResult @default)
         {
-            this.case1.Do(fn, out var r);
+            if (this.value is T1 x)
+                return fn(x);
 
-            return r;
+            return @default;
         }
 
+        public TResult When<TResult>(Func<T1, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T1 x)
+                return fn(x);
+
+            return fallback();
+        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1)
         {  
-            TResult r = default;
-		    if (this.case1.Do(fn1, out r)) return r;
+            switch (this.value)
+            {
+		        case T1 x: return fn1(x);
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
-        public void Match(Action<T1> action1)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
+        public void Match<TResult>(Action<T1> action1)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: action1(x); break;
+         
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
         
+        public static implicit operator Union<T1>(T1 obj)
+        {
+            return TypeUtils<Union<T1>, T1>.Instance.CastFn(obj);
+        }
+         
     }
   
     public abstract class Union<T1, T2> : IEquatable<Union<T1, T2>>
-        where T1 : Case
-        where T2 : Case
     {
-    
-        CaseSelection<T1> case1;
-        CaseSelection<T2> case2;
         
-        public Union(T1 @case)
+        private readonly object value;
+        
+        public Union(T1 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T2 @case)
+        public Union(T2 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
         
         public bool Equals(Union<T1, T2> other)
         {
-            return 
-                this.case1.Equals(other.case1) && 
-                this.case2.Equals(other.case2);
+            if (other is null)
+                return false;
+            return this.value.Equals(other.value);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.value.GetHashCode();
         }
 
         public override bool Equals(object other)
@@ -105,7 +147,8 @@ namespace Aikixd.FunctionalExtensions
 
             return false;
         }
-            public static bool operator == (Union<T1, T2> left, Union<T1, T2> right)
+
+        public static bool operator == (Union<T1, T2> left, Union<T1, T2> right)
         {
             return left.Equals(right);
         }
@@ -114,91 +157,149 @@ namespace Aikixd.FunctionalExtensions
         {
             return !left.Equals(right);
         }
-            private void set(T1 @case)
-        {
-            this.case1 = new SelectedCase<T1>(@case);
-            this.case2 = new UnselectedCase<T2>();
-                    
-        }
-        private void set(T2 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new SelectedCase<T2>(@case);
-                    
-        }
 
-        public void When(Action<T1> action)
+        public bool When(Action<T1> action)
         {
-            this.case1.Do(action.AsFunc(), out var r);
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
         }
 
-        public TResult When<TResult>(Func<T1, TResult> fn)
+        public bool When(Action<T1> action, Action fallback)
         {
-            this.case1.Do(fn, out var r);
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
 
-            return r;
-        }
-        public void When(Action<T2> action)
-        {
-            this.case2.Do(action.AsFunc(), out var r);
-        }
-
-        public TResult When<TResult>(Func<T2, TResult> fn)
-        {
-            this.case2.Do(fn, out var r);
-
-            return r;
+            fallback();
+            return false;
         }
 
+        public TResult When<TResult>(Func<T1, TResult> fn, TResult @default)
+        {
+            if (this.value is T1 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T1, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T1 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T2> action)
+        {
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T2> action, Action fallback)
+        {
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T2, TResult> fn, TResult @default)
+        {
+            if (this.value is T2 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T2, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T2 x)
+                return fn(x);
+
+            return fallback();
+        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2)
         {  
-            TResult r = default;
-		    if (this.case1.Do(fn1, out r)) return r;
-            if (this.case2.Do(fn2, out r)) return r;
+            switch (this.value)
+            {
+		        case T1 x: return fn1(x);
+                case T2 x: return fn2(x);
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
+        public void Match<TResult>(Action<T1> action1, Action<T2> action2)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: action1(x); break;
+                case T2 x: action2(x); break;
+         
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
         
+        public static implicit operator Union<T1, T2>(T1 obj)
+        {
+            return TypeUtils<Union<T1, T2>, T1>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2>(T2 obj)
+        {
+            return TypeUtils<Union<T1, T2>, T2>.Instance.CastFn(obj);
+        }
+         
     }
   
     public abstract class Union<T1, T2, T3> : IEquatable<Union<T1, T2, T3>>
-        where T1 : Case
-        where T2 : Case
-        where T3 : Case
     {
-    
-        CaseSelection<T1> case1;
-        CaseSelection<T2> case2;
-        CaseSelection<T3> case3;
         
-        public Union(T1 @case)
+        private readonly object value;
+        
+        public Union(T1 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T2 @case)
+        public Union(T2 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T3 @case)
+        public Union(T3 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
         
         public bool Equals(Union<T1, T2, T3> other)
         {
-            return 
-                this.case1.Equals(other.case1) && 
-                this.case2.Equals(other.case2) && 
-                this.case3.Equals(other.case3);
+            if (other is null)
+                return false;
+            return this.value.Equals(other.value);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.value.GetHashCode();
         }
 
         public override bool Equals(object other)
@@ -208,7 +309,8 @@ namespace Aikixd.FunctionalExtensions
 
             return false;
         }
-            public static bool operator == (Union<T1, T2, T3> left, Union<T1, T2, T3> right)
+
+        public static bool operator == (Union<T1, T2, T3> left, Union<T1, T2, T3> right)
         {
             return left.Equals(right);
         }
@@ -217,120 +319,198 @@ namespace Aikixd.FunctionalExtensions
         {
             return !left.Equals(right);
         }
-            private void set(T1 @case)
+
+        public bool When(Action<T1> action)
         {
-            this.case1 = new SelectedCase<T1>(@case);
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-                    
-        }
-        private void set(T2 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new SelectedCase<T2>(@case);
-            this.case3 = new UnselectedCase<T3>();
-                    
-        }
-        private void set(T3 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new SelectedCase<T3>(@case);
-                    
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
         }
 
-        public void When(Action<T1> action)
+        public bool When(Action<T1> action, Action fallback)
         {
-            this.case1.Do(action.AsFunc(), out var r);
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
         }
 
-        public TResult When<TResult>(Func<T1, TResult> fn)
+        public TResult When<TResult>(Func<T1, TResult> fn, TResult @default)
         {
-            this.case1.Do(fn, out var r);
+            if (this.value is T1 x)
+                return fn(x);
 
-            return r;
-        }
-        public void When(Action<T2> action)
-        {
-            this.case2.Do(action.AsFunc(), out var r);
+            return @default;
         }
 
-        public TResult When<TResult>(Func<T2, TResult> fn)
+        public TResult When<TResult>(Func<T1, TResult> fn, Func<TResult> fallback)
         {
-            this.case2.Do(fn, out var r);
+            if (this.value is T1 x)
+                return fn(x);
 
-            return r;
+            return fallback();
         }
-        public void When(Action<T3> action)
+        public bool When(Action<T2> action)
         {
-            this.case3.Do(action.AsFunc(), out var r);
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
         }
 
-        public TResult When<TResult>(Func<T3, TResult> fn)
+        public bool When(Action<T2> action, Action fallback)
         {
-            this.case3.Do(fn, out var r);
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
 
-            return r;
+            fallback();
+            return false;
         }
 
+        public TResult When<TResult>(Func<T2, TResult> fn, TResult @default)
+        {
+            if (this.value is T2 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T2, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T2 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T3> action)
+        {
+            if (this.value is T3 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T3> action, Action fallback)
+        {
+            if (this.value is T3 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn, TResult @default)
+        {
+            if (this.value is T3 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T3 x)
+                return fn(x);
+
+            return fallback();
+        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3)
         {  
-            TResult r = default;
-		    if (this.case1.Do(fn1, out r)) return r;
-            if (this.case2.Do(fn2, out r)) return r;
-            if (this.case3.Do(fn3, out r)) return r;
+            switch (this.value)
+            {
+		        case T1 x: return fn1(x);
+                case T2 x: return fn2(x);
+                case T3 x: return fn3(x);
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
-            this.case3.Do(action3.AsFunc(), out r);
+        public void Match<TResult>(Action<T1> action1, Action<T2> action2, Action<T3> action3)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: action1(x); break;
+                case T2 x: action2(x); break;
+                case T3 x: action3(x); break;
+         
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
         
+        public static implicit operator Union<T1, T2, T3>(T1 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3>, T1>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3>(T2 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3>, T2>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3>(T3 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3>, T3>.Instance.CastFn(obj);
+        }
+         
     }
   
     public abstract class Union<T1, T2, T3, T4> : IEquatable<Union<T1, T2, T3, T4>>
-        where T1 : Case
-        where T2 : Case
-        where T3 : Case
-        where T4 : Case
     {
-    
-        CaseSelection<T1> case1;
-        CaseSelection<T2> case2;
-        CaseSelection<T3> case3;
-        CaseSelection<T4> case4;
         
-        public Union(T1 @case)
+        private readonly object value;
+        
+        public Union(T1 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T2 @case)
+        public Union(T2 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T3 @case)
+        public Union(T3 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T4 @case)
+        public Union(T4 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
         
         public bool Equals(Union<T1, T2, T3, T4> other)
         {
-            return 
-                this.case1.Equals(other.case1) && 
-                this.case2.Equals(other.case2) && 
-                this.case3.Equals(other.case3) && 
-                this.case4.Equals(other.case4);
+            if (other is null)
+                return false;
+            return this.value.Equals(other.value);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.value.GetHashCode();
         }
 
         public override bool Equals(object other)
@@ -340,7 +520,8 @@ namespace Aikixd.FunctionalExtensions
 
             return false;
         }
-            public static bool operator == (Union<T1, T2, T3, T4> left, Union<T1, T2, T3, T4> right)
+
+        public static bool operator == (Union<T1, T2, T3, T4> left, Union<T1, T2, T3, T4> right)
         {
             return left.Equals(right);
         }
@@ -349,151 +530,247 @@ namespace Aikixd.FunctionalExtensions
         {
             return !left.Equals(right);
         }
-            private void set(T1 @case)
+
+        public bool When(Action<T1> action)
         {
-            this.case1 = new SelectedCase<T1>(@case);
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-                    
-        }
-        private void set(T2 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new SelectedCase<T2>(@case);
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-                    
-        }
-        private void set(T3 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new SelectedCase<T3>(@case);
-            this.case4 = new UnselectedCase<T4>();
-                    
-        }
-        private void set(T4 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new SelectedCase<T4>(@case);
-                    
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
         }
 
-        public void When(Action<T1> action)
+        public bool When(Action<T1> action, Action fallback)
         {
-            this.case1.Do(action.AsFunc(), out var r);
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
         }
 
-        public TResult When<TResult>(Func<T1, TResult> fn)
+        public TResult When<TResult>(Func<T1, TResult> fn, TResult @default)
         {
-            this.case1.Do(fn, out var r);
+            if (this.value is T1 x)
+                return fn(x);
 
-            return r;
-        }
-        public void When(Action<T2> action)
-        {
-            this.case2.Do(action.AsFunc(), out var r);
+            return @default;
         }
 
-        public TResult When<TResult>(Func<T2, TResult> fn)
+        public TResult When<TResult>(Func<T1, TResult> fn, Func<TResult> fallback)
         {
-            this.case2.Do(fn, out var r);
+            if (this.value is T1 x)
+                return fn(x);
 
-            return r;
+            return fallback();
         }
-        public void When(Action<T3> action)
+        public bool When(Action<T2> action)
         {
-            this.case3.Do(action.AsFunc(), out var r);
-        }
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
 
-        public TResult When<TResult>(Func<T3, TResult> fn)
-        {
-            this.case3.Do(fn, out var r);
-
-            return r;
-        }
-        public void When(Action<T4> action)
-        {
-            this.case4.Do(action.AsFunc(), out var r);
+            return false;
         }
 
-        public TResult When<TResult>(Func<T4, TResult> fn)
+        public bool When(Action<T2> action, Action fallback)
         {
-            this.case4.Do(fn, out var r);
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
 
-            return r;
+            fallback();
+            return false;
         }
 
+        public TResult When<TResult>(Func<T2, TResult> fn, TResult @default)
+        {
+            if (this.value is T2 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T2, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T2 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T3> action)
+        {
+            if (this.value is T3 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T3> action, Action fallback)
+        {
+            if (this.value is T3 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn, TResult @default)
+        {
+            if (this.value is T3 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T3 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T4> action)
+        {
+            if (this.value is T4 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T4> action, Action fallback)
+        {
+            if (this.value is T4 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T4, TResult> fn, TResult @default)
+        {
+            if (this.value is T4 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T4, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T4 x)
+                return fn(x);
+
+            return fallback();
+        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4)
         {  
-            TResult r = default;
-		    if (this.case1.Do(fn1, out r)) return r;
-            if (this.case2.Do(fn2, out r)) return r;
-            if (this.case3.Do(fn3, out r)) return r;
-            if (this.case4.Do(fn4, out r)) return r;
+            switch (this.value)
+            {
+		        case T1 x: return fn1(x);
+                case T2 x: return fn2(x);
+                case T3 x: return fn3(x);
+                case T4 x: return fn4(x);
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
-            this.case3.Do(action3.AsFunc(), out r);
-            this.case4.Do(action4.AsFunc(), out r);
+        public void Match<TResult>(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: action1(x); break;
+                case T2 x: action2(x); break;
+                case T3 x: action3(x); break;
+                case T4 x: action4(x); break;
+         
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
         
+        public static implicit operator Union<T1, T2, T3, T4>(T1 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4>, T1>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4>(T2 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4>, T2>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4>(T3 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4>, T3>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4>(T4 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4>, T4>.Instance.CastFn(obj);
+        }
+         
     }
   
     public abstract class Union<T1, T2, T3, T4, T5> : IEquatable<Union<T1, T2, T3, T4, T5>>
-        where T1 : Case
-        where T2 : Case
-        where T3 : Case
-        where T4 : Case
-        where T5 : Case
     {
-    
-        CaseSelection<T1> case1;
-        CaseSelection<T2> case2;
-        CaseSelection<T3> case3;
-        CaseSelection<T4> case4;
-        CaseSelection<T5> case5;
         
-        public Union(T1 @case)
+        private readonly object value;
+        
+        public Union(T1 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T2 @case)
+        public Union(T2 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T3 @case)
+        public Union(T3 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T4 @case)
+        public Union(T4 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T5 @case)
+        public Union(T5 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
         
         public bool Equals(Union<T1, T2, T3, T4, T5> other)
         {
-            return 
-                this.case1.Equals(other.case1) && 
-                this.case2.Equals(other.case2) && 
-                this.case3.Equals(other.case3) && 
-                this.case4.Equals(other.case4) && 
-                this.case5.Equals(other.case5);
+            if (other is null)
+                return false;
+            return this.value.Equals(other.value);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.value.GetHashCode();
         }
 
         public override bool Equals(object other)
@@ -503,7 +780,8 @@ namespace Aikixd.FunctionalExtensions
 
             return false;
         }
-            public static bool operator == (Union<T1, T2, T3, T4, T5> left, Union<T1, T2, T3, T4, T5> right)
+
+        public static bool operator == (Union<T1, T2, T3, T4, T5> left, Union<T1, T2, T3, T4, T5> right)
         {
             return left.Equals(right);
         }
@@ -512,184 +790,296 @@ namespace Aikixd.FunctionalExtensions
         {
             return !left.Equals(right);
         }
-            private void set(T1 @case)
+
+        public bool When(Action<T1> action)
         {
-            this.case1 = new SelectedCase<T1>(@case);
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-                    
-        }
-        private void set(T2 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new SelectedCase<T2>(@case);
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-                    
-        }
-        private void set(T3 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new SelectedCase<T3>(@case);
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-                    
-        }
-        private void set(T4 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new SelectedCase<T4>(@case);
-            this.case5 = new UnselectedCase<T5>();
-                    
-        }
-        private void set(T5 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new SelectedCase<T5>(@case);
-                    
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
         }
 
-        public void When(Action<T1> action)
+        public bool When(Action<T1> action, Action fallback)
         {
-            this.case1.Do(action.AsFunc(), out var r);
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
         }
 
-        public TResult When<TResult>(Func<T1, TResult> fn)
+        public TResult When<TResult>(Func<T1, TResult> fn, TResult @default)
         {
-            this.case1.Do(fn, out var r);
+            if (this.value is T1 x)
+                return fn(x);
 
-            return r;
-        }
-        public void When(Action<T2> action)
-        {
-            this.case2.Do(action.AsFunc(), out var r);
+            return @default;
         }
 
-        public TResult When<TResult>(Func<T2, TResult> fn)
+        public TResult When<TResult>(Func<T1, TResult> fn, Func<TResult> fallback)
         {
-            this.case2.Do(fn, out var r);
+            if (this.value is T1 x)
+                return fn(x);
 
-            return r;
+            return fallback();
         }
-        public void When(Action<T3> action)
+        public bool When(Action<T2> action)
         {
-            this.case3.Do(action.AsFunc(), out var r);
-        }
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
 
-        public TResult When<TResult>(Func<T3, TResult> fn)
-        {
-            this.case3.Do(fn, out var r);
-
-            return r;
-        }
-        public void When(Action<T4> action)
-        {
-            this.case4.Do(action.AsFunc(), out var r);
+            return false;
         }
 
-        public TResult When<TResult>(Func<T4, TResult> fn)
+        public bool When(Action<T2> action, Action fallback)
         {
-            this.case4.Do(fn, out var r);
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
 
-            return r;
-        }
-        public void When(Action<T5> action)
-        {
-            this.case5.Do(action.AsFunc(), out var r);
-        }
-
-        public TResult When<TResult>(Func<T5, TResult> fn)
-        {
-            this.case5.Do(fn, out var r);
-
-            return r;
+            fallback();
+            return false;
         }
 
+        public TResult When<TResult>(Func<T2, TResult> fn, TResult @default)
+        {
+            if (this.value is T2 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T2, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T2 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T3> action)
+        {
+            if (this.value is T3 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T3> action, Action fallback)
+        {
+            if (this.value is T3 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn, TResult @default)
+        {
+            if (this.value is T3 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T3 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T4> action)
+        {
+            if (this.value is T4 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T4> action, Action fallback)
+        {
+            if (this.value is T4 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T4, TResult> fn, TResult @default)
+        {
+            if (this.value is T4 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T4, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T4 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T5> action)
+        {
+            if (this.value is T5 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T5> action, Action fallback)
+        {
+            if (this.value is T5 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T5, TResult> fn, TResult @default)
+        {
+            if (this.value is T5 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T5, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T5 x)
+                return fn(x);
+
+            return fallback();
+        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5)
         {  
-            TResult r = default;
-		    if (this.case1.Do(fn1, out r)) return r;
-            if (this.case2.Do(fn2, out r)) return r;
-            if (this.case3.Do(fn3, out r)) return r;
-            if (this.case4.Do(fn4, out r)) return r;
-            if (this.case5.Do(fn5, out r)) return r;
+            switch (this.value)
+            {
+		        case T1 x: return fn1(x);
+                case T2 x: return fn2(x);
+                case T3 x: return fn3(x);
+                case T4 x: return fn4(x);
+                case T5 x: return fn5(x);
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
-            this.case3.Do(action3.AsFunc(), out r);
-            this.case4.Do(action4.AsFunc(), out r);
-            this.case5.Do(action5.AsFunc(), out r);
+        public void Match<TResult>(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: action1(x); break;
+                case T2 x: action2(x); break;
+                case T3 x: action3(x); break;
+                case T4 x: action4(x); break;
+                case T5 x: action5(x); break;
+         
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
         
+        public static implicit operator Union<T1, T2, T3, T4, T5>(T1 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5>, T1>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5>(T2 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5>, T2>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5>(T3 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5>, T3>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5>(T4 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5>, T4>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5>(T5 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5>, T5>.Instance.CastFn(obj);
+        }
+         
     }
   
     public abstract class Union<T1, T2, T3, T4, T5, T6> : IEquatable<Union<T1, T2, T3, T4, T5, T6>>
-        where T1 : Case
-        where T2 : Case
-        where T3 : Case
-        where T4 : Case
-        where T5 : Case
-        where T6 : Case
     {
-    
-        CaseSelection<T1> case1;
-        CaseSelection<T2> case2;
-        CaseSelection<T3> case3;
-        CaseSelection<T4> case4;
-        CaseSelection<T5> case5;
-        CaseSelection<T6> case6;
         
-        public Union(T1 @case)
+        private readonly object value;
+        
+        public Union(T1 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T2 @case)
+        public Union(T2 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T3 @case)
+        public Union(T3 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T4 @case)
+        public Union(T4 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T5 @case)
+        public Union(T5 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T6 @case)
+        public Union(T6 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
         
         public bool Equals(Union<T1, T2, T3, T4, T5, T6> other)
         {
-            return 
-                this.case1.Equals(other.case1) && 
-                this.case2.Equals(other.case2) && 
-                this.case3.Equals(other.case3) && 
-                this.case4.Equals(other.case4) && 
-                this.case5.Equals(other.case5) && 
-                this.case6.Equals(other.case6);
+            if (other is null)
+                return false;
+            return this.value.Equals(other.value);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.value.GetHashCode();
         }
 
         public override bool Equals(object other)
@@ -699,7 +1089,8 @@ namespace Aikixd.FunctionalExtensions
 
             return false;
         }
-            public static bool operator == (Union<T1, T2, T3, T4, T5, T6> left, Union<T1, T2, T3, T4, T5, T6> right)
+
+        public static bool operator == (Union<T1, T2, T3, T4, T5, T6> left, Union<T1, T2, T3, T4, T5, T6> right)
         {
             return left.Equals(right);
         }
@@ -708,219 +1099,345 @@ namespace Aikixd.FunctionalExtensions
         {
             return !left.Equals(right);
         }
-            private void set(T1 @case)
+
+        public bool When(Action<T1> action)
         {
-            this.case1 = new SelectedCase<T1>(@case);
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-            this.case6 = new UnselectedCase<T6>();
-                    
-        }
-        private void set(T2 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new SelectedCase<T2>(@case);
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-            this.case6 = new UnselectedCase<T6>();
-                    
-        }
-        private void set(T3 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new SelectedCase<T3>(@case);
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-            this.case6 = new UnselectedCase<T6>();
-                    
-        }
-        private void set(T4 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new SelectedCase<T4>(@case);
-            this.case5 = new UnselectedCase<T5>();
-            this.case6 = new UnselectedCase<T6>();
-                    
-        }
-        private void set(T5 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new SelectedCase<T5>(@case);
-            this.case6 = new UnselectedCase<T6>();
-                    
-        }
-        private void set(T6 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-            this.case6 = new SelectedCase<T6>(@case);
-                    
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
         }
 
-        public void When(Action<T1> action)
+        public bool When(Action<T1> action, Action fallback)
         {
-            this.case1.Do(action.AsFunc(), out var r);
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
         }
 
-        public TResult When<TResult>(Func<T1, TResult> fn)
+        public TResult When<TResult>(Func<T1, TResult> fn, TResult @default)
         {
-            this.case1.Do(fn, out var r);
+            if (this.value is T1 x)
+                return fn(x);
 
-            return r;
-        }
-        public void When(Action<T2> action)
-        {
-            this.case2.Do(action.AsFunc(), out var r);
+            return @default;
         }
 
-        public TResult When<TResult>(Func<T2, TResult> fn)
+        public TResult When<TResult>(Func<T1, TResult> fn, Func<TResult> fallback)
         {
-            this.case2.Do(fn, out var r);
+            if (this.value is T1 x)
+                return fn(x);
 
-            return r;
+            return fallback();
         }
-        public void When(Action<T3> action)
+        public bool When(Action<T2> action)
         {
-            this.case3.Do(action.AsFunc(), out var r);
-        }
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
 
-        public TResult When<TResult>(Func<T3, TResult> fn)
-        {
-            this.case3.Do(fn, out var r);
-
-            return r;
-        }
-        public void When(Action<T4> action)
-        {
-            this.case4.Do(action.AsFunc(), out var r);
+            return false;
         }
 
-        public TResult When<TResult>(Func<T4, TResult> fn)
+        public bool When(Action<T2> action, Action fallback)
         {
-            this.case4.Do(fn, out var r);
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
 
-            return r;
-        }
-        public void When(Action<T5> action)
-        {
-            this.case5.Do(action.AsFunc(), out var r);
-        }
-
-        public TResult When<TResult>(Func<T5, TResult> fn)
-        {
-            this.case5.Do(fn, out var r);
-
-            return r;
-        }
-        public void When(Action<T6> action)
-        {
-            this.case6.Do(action.AsFunc(), out var r);
+            fallback();
+            return false;
         }
 
-        public TResult When<TResult>(Func<T6, TResult> fn)
+        public TResult When<TResult>(Func<T2, TResult> fn, TResult @default)
         {
-            this.case6.Do(fn, out var r);
+            if (this.value is T2 x)
+                return fn(x);
 
-            return r;
+            return @default;
         }
 
+        public TResult When<TResult>(Func<T2, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T2 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T3> action)
+        {
+            if (this.value is T3 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T3> action, Action fallback)
+        {
+            if (this.value is T3 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn, TResult @default)
+        {
+            if (this.value is T3 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T3 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T4> action)
+        {
+            if (this.value is T4 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T4> action, Action fallback)
+        {
+            if (this.value is T4 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T4, TResult> fn, TResult @default)
+        {
+            if (this.value is T4 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T4, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T4 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T5> action)
+        {
+            if (this.value is T5 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T5> action, Action fallback)
+        {
+            if (this.value is T5 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T5, TResult> fn, TResult @default)
+        {
+            if (this.value is T5 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T5, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T5 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T6> action)
+        {
+            if (this.value is T6 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T6> action, Action fallback)
+        {
+            if (this.value is T6 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T6, TResult> fn, TResult @default)
+        {
+            if (this.value is T6 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T6, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T6 x)
+                return fn(x);
+
+            return fallback();
+        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5, Func<T6, TResult> fn6)
         {  
-            TResult r = default;
-		    if (this.case1.Do(fn1, out r)) return r;
-            if (this.case2.Do(fn2, out r)) return r;
-            if (this.case3.Do(fn3, out r)) return r;
-            if (this.case4.Do(fn4, out r)) return r;
-            if (this.case5.Do(fn5, out r)) return r;
-            if (this.case6.Do(fn6, out r)) return r;
+            switch (this.value)
+            {
+		        case T1 x: return fn1(x);
+                case T2 x: return fn2(x);
+                case T3 x: return fn3(x);
+                case T4 x: return fn4(x);
+                case T5 x: return fn5(x);
+                case T6 x: return fn6(x);
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
-            this.case3.Do(action3.AsFunc(), out r);
-            this.case4.Do(action4.AsFunc(), out r);
-            this.case5.Do(action5.AsFunc(), out r);
-            this.case6.Do(action6.AsFunc(), out r);
+        public void Match<TResult>(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: action1(x); break;
+                case T2 x: action2(x); break;
+                case T3 x: action3(x); break;
+                case T4 x: action4(x); break;
+                case T5 x: action5(x); break;
+                case T6 x: action6(x); break;
+         
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
         
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6>(T1 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T1>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6>(T2 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T2>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6>(T3 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T3>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6>(T4 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T4>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6>(T5 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T5>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6>(T6 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T6>.Instance.CastFn(obj);
+        }
+         
     }
   
     public abstract class Union<T1, T2, T3, T4, T5, T6, T7> : IEquatable<Union<T1, T2, T3, T4, T5, T6, T7>>
-        where T1 : Case
-        where T2 : Case
-        where T3 : Case
-        where T4 : Case
-        where T5 : Case
-        where T6 : Case
-        where T7 : Case
     {
-    
-        CaseSelection<T1> case1;
-        CaseSelection<T2> case2;
-        CaseSelection<T3> case3;
-        CaseSelection<T4> case4;
-        CaseSelection<T5> case5;
-        CaseSelection<T6> case6;
-        CaseSelection<T7> case7;
         
-        public Union(T1 @case)
+        private readonly object value;
+        
+        public Union(T1 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T2 @case)
+        public Union(T2 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T3 @case)
+        public Union(T3 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T4 @case)
+        public Union(T4 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T5 @case)
+        public Union(T5 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T6 @case)
+        public Union(T6 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
-        public Union(T7 @case)
+        public Union(T7 value)
         {
-            set(@case);
+            this.value = value ?? throw new UnionCaseNullException();
         }
         
         public bool Equals(Union<T1, T2, T3, T4, T5, T6, T7> other)
         {
-            return 
-                this.case1.Equals(other.case1) && 
-                this.case2.Equals(other.case2) && 
-                this.case3.Equals(other.case3) && 
-                this.case4.Equals(other.case4) && 
-                this.case5.Equals(other.case5) && 
-                this.case6.Equals(other.case6) && 
-                this.case7.Equals(other.case7);
+            if (other is null)
+                return false;
+            return this.value.Equals(other.value);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.value.GetHashCode();
         }
 
         public override bool Equals(object other)
@@ -930,7 +1447,8 @@ namespace Aikixd.FunctionalExtensions
 
             return false;
         }
-            public static bool operator == (Union<T1, T2, T3, T4, T5, T6, T7> left, Union<T1, T2, T3, T4, T5, T6, T7> right)
+
+        public static bool operator == (Union<T1, T2, T3, T4, T5, T6, T7> left, Union<T1, T2, T3, T4, T5, T6, T7> right)
         {
             return left.Equals(right);
         }
@@ -939,190 +1457,344 @@ namespace Aikixd.FunctionalExtensions
         {
             return !left.Equals(right);
         }
-            private void set(T1 @case)
+
+        public bool When(Action<T1> action)
         {
-            this.case1 = new SelectedCase<T1>(@case);
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-            this.case6 = new UnselectedCase<T6>();
-            this.case7 = new UnselectedCase<T7>();
-                    
-        }
-        private void set(T2 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new SelectedCase<T2>(@case);
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-            this.case6 = new UnselectedCase<T6>();
-            this.case7 = new UnselectedCase<T7>();
-                    
-        }
-        private void set(T3 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new SelectedCase<T3>(@case);
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-            this.case6 = new UnselectedCase<T6>();
-            this.case7 = new UnselectedCase<T7>();
-                    
-        }
-        private void set(T4 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new SelectedCase<T4>(@case);
-            this.case5 = new UnselectedCase<T5>();
-            this.case6 = new UnselectedCase<T6>();
-            this.case7 = new UnselectedCase<T7>();
-                    
-        }
-        private void set(T5 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new SelectedCase<T5>(@case);
-            this.case6 = new UnselectedCase<T6>();
-            this.case7 = new UnselectedCase<T7>();
-                    
-        }
-        private void set(T6 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-            this.case6 = new SelectedCase<T6>(@case);
-            this.case7 = new UnselectedCase<T7>();
-                    
-        }
-        private void set(T7 @case)
-        {
-            this.case1 = new UnselectedCase<T1>();
-            this.case2 = new UnselectedCase<T2>();
-            this.case3 = new UnselectedCase<T3>();
-            this.case4 = new UnselectedCase<T4>();
-            this.case5 = new UnselectedCase<T5>();
-            this.case6 = new UnselectedCase<T6>();
-            this.case7 = new SelectedCase<T7>(@case);
-                    
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
         }
 
-        public void When(Action<T1> action)
+        public bool When(Action<T1> action, Action fallback)
         {
-            this.case1.Do(action.AsFunc(), out var r);
+            if (this.value is T1 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
         }
 
-        public TResult When<TResult>(Func<T1, TResult> fn)
+        public TResult When<TResult>(Func<T1, TResult> fn, TResult @default)
         {
-            this.case1.Do(fn, out var r);
+            if (this.value is T1 x)
+                return fn(x);
 
-            return r;
-        }
-        public void When(Action<T2> action)
-        {
-            this.case2.Do(action.AsFunc(), out var r);
+            return @default;
         }
 
-        public TResult When<TResult>(Func<T2, TResult> fn)
+        public TResult When<TResult>(Func<T1, TResult> fn, Func<TResult> fallback)
         {
-            this.case2.Do(fn, out var r);
+            if (this.value is T1 x)
+                return fn(x);
 
-            return r;
+            return fallback();
         }
-        public void When(Action<T3> action)
+        public bool When(Action<T2> action)
         {
-            this.case3.Do(action.AsFunc(), out var r);
-        }
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
 
-        public TResult When<TResult>(Func<T3, TResult> fn)
-        {
-            this.case3.Do(fn, out var r);
-
-            return r;
-        }
-        public void When(Action<T4> action)
-        {
-            this.case4.Do(action.AsFunc(), out var r);
+            return false;
         }
 
-        public TResult When<TResult>(Func<T4, TResult> fn)
+        public bool When(Action<T2> action, Action fallback)
         {
-            this.case4.Do(fn, out var r);
+            if (this.value is T2 x)
+            {
+                action(x);
+                return true;
+            }
 
-            return r;
-        }
-        public void When(Action<T5> action)
-        {
-            this.case5.Do(action.AsFunc(), out var r);
-        }
-
-        public TResult When<TResult>(Func<T5, TResult> fn)
-        {
-            this.case5.Do(fn, out var r);
-
-            return r;
-        }
-        public void When(Action<T6> action)
-        {
-            this.case6.Do(action.AsFunc(), out var r);
+            fallback();
+            return false;
         }
 
-        public TResult When<TResult>(Func<T6, TResult> fn)
+        public TResult When<TResult>(Func<T2, TResult> fn, TResult @default)
         {
-            this.case6.Do(fn, out var r);
+            if (this.value is T2 x)
+                return fn(x);
 
-            return r;
-        }
-        public void When(Action<T7> action)
-        {
-            this.case7.Do(action.AsFunc(), out var r);
+            return @default;
         }
 
-        public TResult When<TResult>(Func<T7, TResult> fn)
+        public TResult When<TResult>(Func<T2, TResult> fn, Func<TResult> fallback)
         {
-            this.case7.Do(fn, out var r);
+            if (this.value is T2 x)
+                return fn(x);
 
-            return r;
+            return fallback();
+        }
+        public bool When(Action<T3> action)
+        {
+            if (this.value is T3 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
         }
 
+        public bool When(Action<T3> action, Action fallback)
+        {
+            if (this.value is T3 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn, TResult @default)
+        {
+            if (this.value is T3 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T3, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T3 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T4> action)
+        {
+            if (this.value is T4 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T4> action, Action fallback)
+        {
+            if (this.value is T4 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T4, TResult> fn, TResult @default)
+        {
+            if (this.value is T4 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T4, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T4 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T5> action)
+        {
+            if (this.value is T5 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T5> action, Action fallback)
+        {
+            if (this.value is T5 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T5, TResult> fn, TResult @default)
+        {
+            if (this.value is T5 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T5, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T5 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T6> action)
+        {
+            if (this.value is T6 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T6> action, Action fallback)
+        {
+            if (this.value is T6 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T6, TResult> fn, TResult @default)
+        {
+            if (this.value is T6 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T6, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T6 x)
+                return fn(x);
+
+            return fallback();
+        }
+        public bool When(Action<T7> action)
+        {
+            if (this.value is T7 x)
+            {
+                action(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool When(Action<T7> action, Action fallback)
+        {
+            if (this.value is T7 x)
+            {
+                action(x);
+                return true;
+            }
+
+            fallback();
+            return false;
+        }
+
+        public TResult When<TResult>(Func<T7, TResult> fn, TResult @default)
+        {
+            if (this.value is T7 x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<T7, TResult> fn, Func<TResult> fallback)
+        {
+            if (this.value is T7 x)
+                return fn(x);
+
+            return fallback();
+        }
 
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5, Func<T6, TResult> fn6, Func<T7, TResult> fn7)
         {  
-            TResult r = default;
-		    if (this.case1.Do(fn1, out r)) return r;
-            if (this.case2.Do(fn2, out r)) return r;
-            if (this.case3.Do(fn3, out r)) return r;
-            if (this.case4.Do(fn4, out r)) return r;
-            if (this.case5.Do(fn5, out r)) return r;
-            if (this.case6.Do(fn6, out r)) return r;
-            if (this.case7.Do(fn7, out r)) return r;
+            switch (this.value)
+            {
+		        case T1 x: return fn1(x);
+                case T2 x: return fn2(x);
+                case T3 x: return fn3(x);
+                case T4 x: return fn4(x);
+                case T5 x: return fn5(x);
+                case T6 x: return fn6(x);
+                case T7 x: return fn7(x);
          
-              throw new InvalidOperationException("The union is empty. This is a bug, please report an issue to https://github.com/Aikixd/FunctionalExtensions.");
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
-        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7)
-        { 
-            int r = default;
-		    this.case1.Do(action1.AsFunc(), out r);
-            this.case2.Do(action2.AsFunc(), out r);
-            this.case3.Do(action3.AsFunc(), out r);
-            this.case4.Do(action4.AsFunc(), out r);
-            this.case5.Do(action5.AsFunc(), out r);
-            this.case6.Do(action6.AsFunc(), out r);
-            this.case7.Do(action7.AsFunc(), out r);
+        public void Match<TResult>(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: action1(x); break;
+                case T2 x: action2(x); break;
+                case T3 x: action3(x); break;
+                case T4 x: action4(x); break;
+                case T5 x: action5(x); break;
+                case T6 x: action6(x); break;
+                case T7 x: action7(x); break;
+         
+            }
+            
+            throw new InvalidUnionStateException();
         }
 
         
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T1 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T1>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T2 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T2>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T3 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T3>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T4 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T4>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T5 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T5>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T6 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T6>.Instance.CastFn(obj);
+        }
+        
+        public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T7 obj)
+        {
+            return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T7>.Instance.CastFn(obj);
+        }
+         
     }
 
 
