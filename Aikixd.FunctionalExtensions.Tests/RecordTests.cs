@@ -244,7 +244,7 @@ namespace Aikixd.FunctionalExtensions.Tests
             var r = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1), Enumerable.Empty<int>());
 
             Assert.AreEqual(
-                "{privateInt:3,SomeInt:1,SomeString:4,AnotherInt:2,privateFieldInt:5,Rec:{One:1,Two:2},List:System.Collections.Generic.List`1[System.Int32],equality:Aikixd.FunctionalExtensions.Tests.RecordTests+EqualityClass,Enumerable:System.Int32[]}",
+                "{privateInt:3,SomeInt:1,SomeString:4,AnotherInt:2,privateFieldInt:5,Rec:{One:1,Two:2},List:System.Collections.Generic.List`1[System.Int32],equality:Aikixd.FunctionalExtensions.Tests.RecordTests+EqualityClass,Enumerable:System.Linq.EmptyPartition`1[System.Int32]}",
                 r.ToString().Replace(" ", "").Replace("\n", ""));
         }
 
