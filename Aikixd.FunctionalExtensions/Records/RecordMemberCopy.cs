@@ -9,11 +9,12 @@ namespace Aikixd.FunctionalExtensions.Records
 {
     public class RecordMemberCopy<TRecord> : IEnumerable<(MemberInfo member, Func<TRecord, object> fn)>
     {
-        private LinkedList<(MemberInfo, Func<TRecord, object>)> alterations;
+        private List<(MemberInfo, Func<TRecord, object?>)> alterations;
 
         internal RecordMemberCopy()
         {
-            alterations = new LinkedList<(MemberInfo, Func<TRecord, object>)>();
+            // TODO: initialize with half members count
+            alterations = new List<(MemberInfo, Func<TRecord, object?>)>();
         }
 
         public IEnumerator<(MemberInfo member, Func<TRecord, object> fn)> GetEnumerator()
@@ -25,7 +26,7 @@ namespace Aikixd.FunctionalExtensions.Records
             Expression<Func<TRecord, TMember>> memberAccess,
             TMember newVal)
         {
-            alterations.AddLast((((MemberExpression)memberAccess.Body).Member, (x) => newVal));
+            alterations.Add((((MemberExpression)memberAccess.Body).Member, (x) => newVal));
 
             return this;
         }
@@ -34,7 +35,7 @@ namespace Aikixd.FunctionalExtensions.Records
             Expression<Func<TRecord, TMember>> memberAccess,
             Func<TRecord, TMember> newValFn)
         {
-            alterations.AddLast((((MemberExpression)memberAccess.Body).Member, (x) => newValFn(x)));
+            alterations.Add((((MemberExpression)memberAccess.Body).Member, (x) => newValFn(x)));
 
             return this;
         }

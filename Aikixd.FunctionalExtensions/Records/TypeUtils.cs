@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
+#nullable disable
+
 namespace Aikixd.FunctionalExtensions.Records
 {
     internal class TypeUtils<T>
@@ -63,3 +65,5 @@ namespace Aikixd.FunctionalExtensions.Records
         public IReadOnlyDictionary<MemberInfo, Action<T, object>> SetMemberFnMap { get; }
     }
 }
+
+#nullable restore

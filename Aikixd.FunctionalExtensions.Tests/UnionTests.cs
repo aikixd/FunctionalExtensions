@@ -46,7 +46,7 @@ namespace Aikixd.FunctionalExtensions.Tests
                 some => true,
                 none => false);
 
-            ContactInfo ci = new Email(new Email());
+            ContactInfo ci = new ContactInfo(new Email());
 
             var contactInfoResult = ci.Match(email => (object)email, phone => phone);
 
@@ -92,9 +92,9 @@ namespace Aikixd.FunctionalExtensions.Tests
         public void Union_Compare()
         {
             var email = new Email();
-            var ci1 = (ContactInfo) new ContactInfo.Email(email);
-            var ci2 = (ContactInfo) new ContactInfo.Email(email);
-            var ci3 = (ContactInfo)new ContactInfo.Email(new Email());
+            var ci1 = (ContactInfo) new ContactInfo(email);
+            var ci2 = (ContactInfo) new ContactInfo(email);
+            var ci3 = (ContactInfo)new ContactInfo(new Email());
 
             var none1 = (Option<int>) new Option<int>.None();
             var none2 = (Option<int>)new Option<int>.None();
