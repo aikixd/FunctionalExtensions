@@ -46,7 +46,16 @@ namespace Aikixd.FunctionalExtensions.Tests
 
             Assert.AreEqual(oIntSome.When((Option<int>.Some x) => x.Value, () => throw new Exception()), 1);
             Assert.AreEqual(oIntNone.When((Option<int>.Some _) => throw new Exception(), () => 2), 2);
+            Assert.IsTrue(oIntSome.When((Option<int>.Some _) => { }));
+            Assert.IsFalse(oIntSome.When((Option<int>.None _) => { }));
 
+            oIntSome.Match(
+                _ => { },
+                _ => { Assert.Fail(); });
+
+            oIntNone.Match(
+                x => { Assert.Fail(); },
+                x => { });
         }
     }
 }

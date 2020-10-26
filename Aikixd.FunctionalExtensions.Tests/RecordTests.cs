@@ -28,6 +28,8 @@ namespace Aikixd.FunctionalExtensions.Tests
             }
         }
 
+        public class EmptyRecord : Record<EmptyRecord>
+        { }
 
         public class InnerRecord : Record<InnerRecord>
         {
@@ -109,6 +111,16 @@ namespace Aikixd.FunctionalExtensions.Tests
 
             var r1 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
             var r2 = new SomeRecord(1, "1", 2, 3, 4, new InnerRecord(1, 2), list, eqClass, Enumerable.Empty<int>());
+
+            Assert.IsTrue(r1.Equals(r2));
+            Assert.IsTrue(r1 == r2);
+        }
+
+        [TestMethod]
+        public void Records_AreEqual_Empty()
+        {
+            var r1 = new EmptyRecord();
+            var r2 = new EmptyRecord();
 
             Assert.IsTrue(r1.Equals(r2));
             Assert.IsTrue(r1 == r2);
@@ -212,6 +224,16 @@ namespace Aikixd.FunctionalExtensions.Tests
             var r = new SomeRecord(1, "4", 2, 3, 5, new InnerRecord(1, 2), list, new EqualityClass(1), Enumerable.Empty<int>());
 
             Assert.AreEqual(r.GetHashCode(), r.GetHashCodeTest());
+        }
+
+        [TestMethod]
+        public void Records_GetHashCode_Empty()
+        {
+            var list = new List<int>();
+
+            var r = new EmptyRecord();
+
+            Assert.AreEqual(r.GetHashCode(), typeof(EmptyRecord).GetHashCode());
         }
 
         [TestMethod]

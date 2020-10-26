@@ -31,9 +31,9 @@ namespace Aikixd.FunctionalExtensions
         }
     }
 
-    public sealed class Ok : Record<Ok> { }
+    public class Ok : Record<Ok> { }
 
-    public sealed class Error<T> : Record<Error<T>>
+    public class Error<T> : Record<Error<T>>
     {
         public T Value { get; }
 
@@ -43,7 +43,7 @@ namespace Aikixd.FunctionalExtensions
         }
     }
 
-    public sealed class Ok<T> : Record<Ok<T>>
+    public class Ok<T> : Record<Ok<T>>
     {
         public T Value { get; }
 

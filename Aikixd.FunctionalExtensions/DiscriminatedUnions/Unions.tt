@@ -160,7 +160,7 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
             throw new InvalidUnionStateException();
         }
 
-        public void Match<TResult>(<#= 
+        public void Match(<#= 
             argNames
             .Select((x, i) => new { str = x, i = i + 1 })
             .Select(x => "Action<" + x.str + "> action" + x.i)
@@ -176,9 +176,8 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
         <#
         }
         #> 
+                default: throw new InvalidUnionStateException();
             }
-            
-            throw new InvalidUnionStateException();
         }
 
         <#

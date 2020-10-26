@@ -95,15 +95,14 @@ namespace Aikixd.FunctionalExtensions
             throw new InvalidUnionStateException();
         }
 
-        public void Match<TResult>(Action<T1> action1)
+        public void Match(Action<T1> action1)
         {  
             switch (this.value)
             {
 		        case T1 x: action1(x); break;
          
+                default: throw new InvalidUnionStateException();
             }
-            
-            throw new InvalidUnionStateException();
         }
 
         
@@ -247,16 +246,15 @@ namespace Aikixd.FunctionalExtensions
             throw new InvalidUnionStateException();
         }
 
-        public void Match<TResult>(Action<T1> action1, Action<T2> action2)
+        public void Match(Action<T1> action1, Action<T2> action2)
         {  
             switch (this.value)
             {
 		        case T1 x: action1(x); break;
                 case T2 x: action2(x); break;
          
+                default: throw new InvalidUnionStateException();
             }
-            
-            throw new InvalidUnionStateException();
         }
 
         
@@ -448,7 +446,7 @@ namespace Aikixd.FunctionalExtensions
             throw new InvalidUnionStateException();
         }
 
-        public void Match<TResult>(Action<T1> action1, Action<T2> action2, Action<T3> action3)
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3)
         {  
             switch (this.value)
             {
@@ -456,9 +454,8 @@ namespace Aikixd.FunctionalExtensions
                 case T2 x: action2(x); break;
                 case T3 x: action3(x); break;
          
+                default: throw new InvalidUnionStateException();
             }
-            
-            throw new InvalidUnionStateException();
         }
 
         
@@ -698,7 +695,7 @@ namespace Aikixd.FunctionalExtensions
             throw new InvalidUnionStateException();
         }
 
-        public void Match<TResult>(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4)
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4)
         {  
             switch (this.value)
             {
@@ -707,9 +704,8 @@ namespace Aikixd.FunctionalExtensions
                 case T3 x: action3(x); break;
                 case T4 x: action4(x); break;
          
+                default: throw new InvalidUnionStateException();
             }
-            
-            throw new InvalidUnionStateException();
         }
 
         
@@ -997,7 +993,7 @@ namespace Aikixd.FunctionalExtensions
             throw new InvalidUnionStateException();
         }
 
-        public void Match<TResult>(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5)
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5)
         {  
             switch (this.value)
             {
@@ -1007,9 +1003,8 @@ namespace Aikixd.FunctionalExtensions
                 case T4 x: action4(x); break;
                 case T5 x: action5(x); break;
          
+                default: throw new InvalidUnionStateException();
             }
-            
-            throw new InvalidUnionStateException();
         }
 
         
@@ -1345,7 +1340,7 @@ namespace Aikixd.FunctionalExtensions
             throw new InvalidUnionStateException();
         }
 
-        public void Match<TResult>(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6)
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6)
         {  
             switch (this.value)
             {
@@ -1356,9 +1351,8 @@ namespace Aikixd.FunctionalExtensions
                 case T5 x: action5(x); break;
                 case T6 x: action6(x); break;
          
+                default: throw new InvalidUnionStateException();
             }
-            
-            throw new InvalidUnionStateException();
         }
 
         
@@ -1742,7 +1736,7 @@ namespace Aikixd.FunctionalExtensions
             throw new InvalidUnionStateException();
         }
 
-        public void Match<TResult>(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7)
+        public void Match(Action<T1> action1, Action<T2> action2, Action<T3> action3, Action<T4> action4, Action<T5> action5, Action<T6> action6, Action<T7> action7)
         {  
             switch (this.value)
             {
@@ -1754,9 +1748,8 @@ namespace Aikixd.FunctionalExtensions
                 case T6 x: action6(x); break;
                 case T7 x: action7(x); break;
          
+                default: throw new InvalidUnionStateException();
             }
-            
-            throw new InvalidUnionStateException();
         }
 
         

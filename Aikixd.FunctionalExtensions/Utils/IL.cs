@@ -60,25 +60,41 @@ namespace Aikixd.FunctionalExtensions.Utils
 
         public static Func<T, int> GenerateGetHashCode<T>()
         {
-            var param = Expression.Parameter(typeof(T), "obj");
-            var hash = Expression.Variable(typeof(int), "hash");            
+            return GetFields<T>().Length == 0 ? generateConst() : generateNormal();
+                
 
-            var computation =
-                GetFields<T>()
-                .Select(fieldInfo =>
-                    Expression.AddAssign(hash, 
-                        Expression.Call(
-                            Expression.Field(param, fieldInfo), 
-                            typeof(object).GetMethod("GetHashCode", new Type[] { }))));
+            Func<T, int> generateConst()
+            {
+                var param = Expression.Parameter(typeof(T), "obj");
 
-            var block =
-                Expression
-                .Block(
-                    new[] { hash },
-                    computation
-                    );
+                return 
+                    Expression.Lambda<Func<T, int>>(
+                        Expression.Constant(typeof(T).GetHashCode(), typeof(int)), param)
+                    .Compile();
+            }
 
-            return Expression.Lambda<Func<T, int>>(block, param).Compile();
+            Func<T, int> generateNormal()
+            {
+                var param = Expression.Parameter(typeof(T), "obj");
+                var hash = Expression.Variable(typeof(int), "hash");
+
+                var computation =
+                    GetFields<T>()
+                    .Select(fieldInfo =>
+                        Expression.AddAssign(hash,
+                            Expression.Call(
+                                Expression.Field(param, fieldInfo),
+                                typeof(object).GetMethod("GetHashCode", new Type[] { }))));
+
+                var block =
+                    Expression
+                    .Block(
+                        new[] { hash },
+                        computation
+                        );
+
+                return Expression.Lambda<Func<T, int>>(block, param).Compile();
+            }
         }
 
         public static Func<T, int, string> GenerateToString<T>()
