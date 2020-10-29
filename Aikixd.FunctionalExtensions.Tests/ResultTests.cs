@@ -81,6 +81,17 @@ namespace Aikixd.FunctionalExtensions.Tests
         }
 
         [TestMethod]
+        public void ResultUnion_Generic_Bind_Leaf()
+        {
+            var ok = new Result<int, int>(new Ok<int>(123));
+
+            var resultOk =
+                ok.Bind(x => new Result<int>(new Ok()));
+                
+            Assert.AreEqual(new Result<int>(new Ok()), resultOk);
+        }
+
+        [TestMethod]
         public void ResultUnion_Generic_BindConvert()
         {
             var error = new Result<string,int>(new Error<int>(1));

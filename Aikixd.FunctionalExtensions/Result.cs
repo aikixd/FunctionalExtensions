@@ -104,6 +104,14 @@ namespace Aikixd.FunctionalExtensions
                     error => error);
         }
 
+        public Result<TError> Bind(Func<T, Result<TError>> fn)
+        {
+            return
+                this.Match(
+                    ok => fn(ok.Value),
+                    error => error);
+        }
+
         public Result<U, UError> Bind<U, UError>(Func<T, Result<U, UError>> fn, Func<TError, UError> convert)
         {
             return
