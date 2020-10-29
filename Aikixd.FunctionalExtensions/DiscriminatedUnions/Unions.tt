@@ -190,9 +190,15 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
         {
             return TypeUtils<<#= className #>, <#= typeArgName #>>.Instance.CastFn(obj);
         }
+
         <#
         }
         #> 
+
+        public bool Is<T>()
+        {
+            return this.value is T;
+        }        
 <#
     
 

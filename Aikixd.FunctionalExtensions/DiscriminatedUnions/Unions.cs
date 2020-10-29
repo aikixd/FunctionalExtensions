@@ -110,7 +110,13 @@ namespace Aikixd.FunctionalExtensions
         {
             return TypeUtils<Union<T1>, T1>.Instance.CastFn(obj);
         }
+
          
+
+        public bool Is<T>()
+        {
+            return this.value is T;
+        }        
     }
   
     public abstract class Union<T1, T2> : IEquatable<Union<T1, T2>>
@@ -262,12 +268,19 @@ namespace Aikixd.FunctionalExtensions
         {
             return TypeUtils<Union<T1, T2>, T1>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2>(T2 obj)
         {
             return TypeUtils<Union<T1, T2>, T2>.Instance.CastFn(obj);
         }
+
          
+
+        public bool Is<T>()
+        {
+            return this.value is T;
+        }        
     }
   
     public abstract class Union<T1, T2, T3> : IEquatable<Union<T1, T2, T3>>
@@ -463,17 +476,25 @@ namespace Aikixd.FunctionalExtensions
         {
             return TypeUtils<Union<T1, T2, T3>, T1>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3>(T2 obj)
         {
             return TypeUtils<Union<T1, T2, T3>, T2>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3>(T3 obj)
         {
             return TypeUtils<Union<T1, T2, T3>, T3>.Instance.CastFn(obj);
         }
+
          
+
+        public bool Is<T>()
+        {
+            return this.value is T;
+        }        
     }
   
     public abstract class Union<T1, T2, T3, T4> : IEquatable<Union<T1, T2, T3, T4>>
@@ -713,22 +734,31 @@ namespace Aikixd.FunctionalExtensions
         {
             return TypeUtils<Union<T1, T2, T3, T4>, T1>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4>(T2 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4>, T2>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4>(T3 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4>, T3>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4>(T4 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4>, T4>.Instance.CastFn(obj);
         }
+
          
+
+        public bool Is<T>()
+        {
+            return this.value is T;
+        }        
     }
   
     public abstract class Union<T1, T2, T3, T4, T5> : IEquatable<Union<T1, T2, T3, T4, T5>>
@@ -1012,27 +1042,37 @@ namespace Aikixd.FunctionalExtensions
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5>, T1>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5>(T2 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5>, T2>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5>(T3 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5>, T3>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5>(T4 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5>, T4>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5>(T5 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5>, T5>.Instance.CastFn(obj);
         }
+
          
+
+        public bool Is<T>()
+        {
+            return this.value is T;
+        }        
     }
   
     public abstract class Union<T1, T2, T3, T4, T5, T6> : IEquatable<Union<T1, T2, T3, T4, T5, T6>>
@@ -1360,32 +1400,43 @@ namespace Aikixd.FunctionalExtensions
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T1>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5, T6>(T2 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T2>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5, T6>(T3 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T3>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5, T6>(T4 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T4>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5, T6>(T5 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T5>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5, T6>(T6 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6>, T6>.Instance.CastFn(obj);
         }
+
          
+
+        public bool Is<T>()
+        {
+            return this.value is T;
+        }        
     }
   
     public abstract class Union<T1, T2, T3, T4, T5, T6, T7> : IEquatable<Union<T1, T2, T3, T4, T5, T6, T7>>
@@ -1757,37 +1808,49 @@ namespace Aikixd.FunctionalExtensions
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T1>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T2 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T2>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T3 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T3>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T4 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T4>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T5 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T5>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T6 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T6>.Instance.CastFn(obj);
         }
+
         
         public static implicit operator Union<T1, T2, T3, T4, T5, T6, T7>(T7 obj)
         {
             return TypeUtils<Union<T1, T2, T3, T4, T5, T6, T7>, T7>.Instance.CastFn(obj);
         }
+
          
+
+        public bool Is<T>()
+        {
+            return this.value is T;
+        }        
     }
 
 
