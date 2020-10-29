@@ -59,6 +59,22 @@ namespace Aikixd.FunctionalExtensions
 
         public Result(Error<TError> value) : base(value) { }
 
+        public Result<TError> Bind(Func<Result<TError>> fn)
+        {
+            return
+                this.Match(
+                    ok => fn(),
+                    error => this);
+        }
+
+        public Result<TOtherError> Bind<TOtherError>(Func<Result<TOtherError>> fn, Func<TError, TOtherError> convert)
+        {
+            return
+                this.Match(
+                    ok => fn(),
+                    error => convert(error.Value));
+        }
+
         public static implicit operator Result<TError>(Ok ok)
             => new Result<TError>(ok);
 
@@ -79,6 +95,22 @@ namespace Aikixd.FunctionalExtensions
         public Result(TError value) : base(new Error<TError>(value)) { }
 
         public Result(Error<TError> value) : base(value) { }
+
+        public Result<U, TError> Bind<U>(Func<T, Result<U, TError>> fn)
+        {
+            return
+                this.Match(
+                    ok => fn(ok.Value),
+                    error => error);
+        }
+
+        public Result<U, UError> Bind<U, UError>(Func<T, Result<U, UError>> fn, Func<TError, UError> convert)
+        {
+            return
+                this.Match(
+                    ok => fn(ok.Value),
+                    error => convert(error.Value));
+        }
 
         public static implicit operator Result<T, TError>(Ok<T> ok)
             => new Result<T, TError>(ok);
