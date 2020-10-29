@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageOutputPath>C:\Dev\LocalPackages\Aikixd.FunctionalExtensions\</PackageOutputPath>
-    <Version>2.0.1</Version>
+    <Version>2.0.2</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <Authors>Dmitriy Sorkin</Authors>
