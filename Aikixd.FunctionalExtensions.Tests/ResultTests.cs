@@ -101,5 +101,31 @@ namespace Aikixd.FunctionalExtensions.Tests
 
             Assert.AreEqual(new Result<string, string>(new Error<string>("1")), resultError);
         }
+
+        [TestMethod]
+        public void ResulUnion_Select()
+        {
+            var ok = new Result<int>(new Ok());
+            var error = new Result<int>(new Error<int>(1));
+
+            var resultOk = ok.Select(x => x.ToString());
+            var resultError = error.Select(x => x.ToString());
+
+            Assert.AreEqual(new Result<string>(new Ok()), resultOk);
+            Assert.AreEqual(new Result<string>(new Error<string>("1")), resultError);
+        }
+
+        [TestMethod]
+        public void ResulUnion_Generic_Select()
+        {
+            var ok = new Result<int, int>(new Ok<int>(1));
+            var error = new Result<int, int>(new Error<int>(1));
+
+            var resultOk = ok.Select(x => x.ToString(), x => (x + x).ToString());
+            var resultError = error.Select(x => x.ToString(), x => (x + x).ToString());
+
+            Assert.AreEqual(new Result<string, string>(new Ok<string>("1")), resultOk);
+            Assert.AreEqual(new Result<string, string>(new Error<string>("2")), resultError);
+        }
     }
 }

@@ -67,12 +67,24 @@ namespace Aikixd.FunctionalExtensions
                     error => this);
         }
 
-        public Result<TOtherError> Bind<TOtherError>(Func<Result<TOtherError>> fn, Func<TError, TOtherError> convert)
+        public Result<TOtherError> Bind<TOtherError>(
+            Func<Result<TOtherError>> fn,
+            Func<TError, TOtherError> convert)
         {
             return
                 this.Match(
                     ok => fn(),
                     error => convert(error.Value));
+        }
+
+        public Result<TOtherError> Select<TOtherError>(
+            Func<TError, TOtherError> map)
+        {
+
+            return this.Match(
+                ok => new Result<TOtherError>(ok),
+                error => new Result<TOtherError>(new Error<TOtherError>(map(error.Value)))
+            );
         }
 
         public static implicit operator Result<TError>(Ok ok)
@@ -118,6 +130,17 @@ namespace Aikixd.FunctionalExtensions
                 this.Match(
                     ok => fn(ok.Value),
                     error => convert(error.Value));
+        }
+
+        public Result<TOtherResult, TOtherError> Select<TOtherResult, TOtherError>(
+            Func<T, TOtherResult> mapOk,
+            Func<TError, TOtherError> mapErr)
+        {
+
+            return this.Match(
+                ok => new Result<TOtherResult, TOtherError>(new Ok<TOtherResult>(mapOk(ok.Value))),
+                error => new Result<TOtherResult, TOtherError>(new Error<TOtherError>(mapErr(error.Value)))
+            );
         }
 
         public static implicit operator Result<T, TError>(Ok<T> ok)
