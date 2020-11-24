@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Aikixd.FunctionalExtensions.Tests
 {
@@ -47,6 +48,29 @@ namespace Aikixd.FunctionalExtensions.Tests
             Assert.AreEqual(new Result<int>(new Ok()), resultOk);
             Assert.AreEqual(new Result<int>(new Error<int>(1)), resultError);
             Assert.AreEqual(new Result<int>(new Error<int>(2)), resultError2);
+        }
+
+        [TestMethod]
+        public async Task ResultUnion_Bind_Async()
+        {
+            var ok = new Result<int>(new Ok());
+            var error = new Result<int>(new Error<int>(1));
+
+            var resultOk =
+                await ok.Bind(async () => {
+                    await Task.Delay(50);
+                    return new Result<int>(new Ok()); 
+                });
+
+            var resultError =
+                await error.Bind(async () =>
+                {
+                    await Task.Delay(50);
+                    return new Result<int>(new Error<int>(2));
+                });
+
+            Assert.AreEqual(new Result<int>(new Ok()), resultOk);
+            Assert.AreEqual(new Result<int>(new Error<int>(1)), resultError);
         }
 
         [TestMethod]

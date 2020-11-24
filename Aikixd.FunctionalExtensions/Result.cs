@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Aikixd.FunctionalExtensions
 {
@@ -77,6 +78,24 @@ namespace Aikixd.FunctionalExtensions
                     error => convert(error.Value));
         }
 
+        public Task<Result<TError>> Bind(Func<Task<Result<TError>>> fn)
+        {
+            return
+                this.Match(
+                    ok => fn(),
+                    error => Task.FromResult(this));
+        }
+
+        public Task<Result<TOtherError>> Bind<TOtherError>(
+            Func<Task<Result<TOtherError>>> fn,
+            Func<TError, Task<TOtherError>> convert)
+        {
+            return
+                this.Match(
+                    ok => fn(),
+                    async error => (Result<TOtherError>) await convert(error.Value));
+        }
+
         public Result<TOtherError> Select<TOtherError>(
             Func<TError, TOtherError> map)
         {
@@ -132,6 +151,33 @@ namespace Aikixd.FunctionalExtensions
                     error => convert(error.Value));
         }
 
+        public Task<Result<U, TError>> Bind<U>(Func<T, Task<Result<U, TError>>> fn)
+        {
+            return
+                this.Match(
+                    ok => fn(ok.Value),
+                    async error => (Result<U, TError>) await Task.FromResult(error));
+        }
+
+        public Task<Result<TError>> Bind(Func<T, Task<Result<TError>>> fn)
+        {
+            return
+                
+                this.Match(
+                    ok =>  fn(ok.Value),
+                    async error => (Result<TError>) await Task.FromResult(error));
+        }
+
+        public Task<Result<U, UError>> Bind<U, UError>(
+            Func<T, Task<Result<U, UError>>> fn,
+            Func<TError, Task<UError>> convert)
+        {
+            return
+                this.Match(
+                    ok => fn(ok.Value),
+                    async error => (Result<U, UError>) await convert(error.Value));
+        }
+
         public Result<TOtherResult, TOtherError> Select<TOtherResult, TOtherError>(
             Func<T, TOtherResult> mapOk,
             Func<TError, TOtherError> mapErr)
@@ -141,6 +187,12 @@ namespace Aikixd.FunctionalExtensions
                 ok => new Result<TOtherResult, TOtherError>(new Ok<TOtherResult>(mapOk(ok.Value))),
                 error => new Result<TOtherResult, TOtherError>(new Error<TOtherError>(mapErr(error.Value)))
             );
+        }
+
+        public Result<TOtherResult, TError> Select<TOtherResult>(
+            Func<T, TOtherResult> map)
+        {
+            return this.Select(map, x => x);
         }
 
         public static implicit operator Result<T, TError>(Ok<T> ok)

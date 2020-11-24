@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Aikixd.FunctionalExtensions.DiscriminatedUnions;
 
 namespace Aikixd.FunctionalExtensions
@@ -84,6 +85,46 @@ namespace Aikixd.FunctionalExtensions
             return fallback();
         }
 
+        
+        public async Task<bool> When(Func<T1, Task> fn)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T1, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return await fallback();
+        }
+
         public TResult Match<TResult>(Func<T1, TResult> fn1)
         {  
             switch (this.value)
@@ -100,6 +141,28 @@ namespace Aikixd.FunctionalExtensions
             switch (this.value)
             {
 		        case T1 x: action1(x); break;
+         
+                default: throw new InvalidUnionStateException();
+            }
+        }
+
+        
+        public async Task<TResult> Match<TResult>(Func<T1, Task<TResult>> fn1)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: return await fn1(x);
+         
+            }
+            
+            throw new InvalidUnionStateException();
+        }
+
+        public async Task Match(Func<T1, Task> fn1)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: await fn1(x); break;
          
                 default: throw new InvalidUnionStateException();
             }
@@ -201,6 +264,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T1, Task> fn)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T1, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T2> action)
         {
             if (this.value is T2 x)
@@ -240,6 +343,46 @@ namespace Aikixd.FunctionalExtensions
             return fallback();
         }
 
+        
+        public async Task<bool> When(Func<T2, Task> fn)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T2, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return await fallback();
+        }
+
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2)
         {  
             switch (this.value)
@@ -258,6 +401,30 @@ namespace Aikixd.FunctionalExtensions
             {
 		        case T1 x: action1(x); break;
                 case T2 x: action2(x); break;
+         
+                default: throw new InvalidUnionStateException();
+            }
+        }
+
+        
+        public async Task<TResult> Match<TResult>(Func<T1, Task<TResult>> fn1, Func<T2, Task<TResult>> fn2)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: return await fn1(x);
+                case T2 x: return await fn2(x);
+         
+            }
+            
+            throw new InvalidUnionStateException();
+        }
+
+        public async Task Match(Func<T1, Task> fn1, Func<T2, Task> fn2)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: await fn1(x); break;
+                case T2 x: await fn2(x); break;
          
                 default: throw new InvalidUnionStateException();
             }
@@ -369,6 +536,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T1, Task> fn)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T1, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T2> action)
         {
             if (this.value is T2 x)
@@ -406,6 +613,46 @@ namespace Aikixd.FunctionalExtensions
                 return fn(x);
 
             return fallback();
+        }
+
+        
+        public async Task<bool> When(Func<T2, Task> fn)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T2, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return await fallback();
         }
         public bool When(Action<T3> action)
         {
@@ -446,6 +693,46 @@ namespace Aikixd.FunctionalExtensions
             return fallback();
         }
 
+        
+        public async Task<bool> When(Func<T3, Task> fn)
+        {
+            if (this.value is T3 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T3, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T3 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T3, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T3 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T3, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T3 x)
+                return await fn(x);
+
+            return await fallback();
+        }
+
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3)
         {  
             switch (this.value)
@@ -466,6 +753,32 @@ namespace Aikixd.FunctionalExtensions
 		        case T1 x: action1(x); break;
                 case T2 x: action2(x); break;
                 case T3 x: action3(x); break;
+         
+                default: throw new InvalidUnionStateException();
+            }
+        }
+
+        
+        public async Task<TResult> Match<TResult>(Func<T1, Task<TResult>> fn1, Func<T2, Task<TResult>> fn2, Func<T3, Task<TResult>> fn3)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: return await fn1(x);
+                case T2 x: return await fn2(x);
+                case T3 x: return await fn3(x);
+         
+            }
+            
+            throw new InvalidUnionStateException();
+        }
+
+        public async Task Match(Func<T1, Task> fn1, Func<T2, Task> fn2, Func<T3, Task> fn3)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: await fn1(x); break;
+                case T2 x: await fn2(x); break;
+                case T3 x: await fn3(x); break;
          
                 default: throw new InvalidUnionStateException();
             }
@@ -587,6 +900,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T1, Task> fn)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T1, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T2> action)
         {
             if (this.value is T2 x)
@@ -625,6 +978,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T2, Task> fn)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T2, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T3> action)
         {
             if (this.value is T3 x)
@@ -662,6 +1055,46 @@ namespace Aikixd.FunctionalExtensions
                 return fn(x);
 
             return fallback();
+        }
+
+        
+        public async Task<bool> When(Func<T3, Task> fn)
+        {
+            if (this.value is T3 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T3, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T3 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T3, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T3 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T3, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T3 x)
+                return await fn(x);
+
+            return await fallback();
         }
         public bool When(Action<T4> action)
         {
@@ -702,6 +1135,46 @@ namespace Aikixd.FunctionalExtensions
             return fallback();
         }
 
+        
+        public async Task<bool> When(Func<T4, Task> fn)
+        {
+            if (this.value is T4 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T4, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T4 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T4, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T4 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T4, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T4 x)
+                return await fn(x);
+
+            return await fallback();
+        }
+
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4)
         {  
             switch (this.value)
@@ -724,6 +1197,34 @@ namespace Aikixd.FunctionalExtensions
                 case T2 x: action2(x); break;
                 case T3 x: action3(x); break;
                 case T4 x: action4(x); break;
+         
+                default: throw new InvalidUnionStateException();
+            }
+        }
+
+        
+        public async Task<TResult> Match<TResult>(Func<T1, Task<TResult>> fn1, Func<T2, Task<TResult>> fn2, Func<T3, Task<TResult>> fn3, Func<T4, Task<TResult>> fn4)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: return await fn1(x);
+                case T2 x: return await fn2(x);
+                case T3 x: return await fn3(x);
+                case T4 x: return await fn4(x);
+         
+            }
+            
+            throw new InvalidUnionStateException();
+        }
+
+        public async Task Match(Func<T1, Task> fn1, Func<T2, Task> fn2, Func<T3, Task> fn3, Func<T4, Task> fn4)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: await fn1(x); break;
+                case T2 x: await fn2(x); break;
+                case T3 x: await fn3(x); break;
+                case T4 x: await fn4(x); break;
          
                 default: throw new InvalidUnionStateException();
             }
@@ -855,6 +1356,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T1, Task> fn)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T1, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T2> action)
         {
             if (this.value is T2 x)
@@ -892,6 +1433,46 @@ namespace Aikixd.FunctionalExtensions
                 return fn(x);
 
             return fallback();
+        }
+
+        
+        public async Task<bool> When(Func<T2, Task> fn)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T2, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return await fallback();
         }
         public bool When(Action<T3> action)
         {
@@ -931,6 +1512,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T3, Task> fn)
+        {
+            if (this.value is T3 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T3, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T3 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T3, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T3 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T3, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T3 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T4> action)
         {
             if (this.value is T4 x)
@@ -968,6 +1589,46 @@ namespace Aikixd.FunctionalExtensions
                 return fn(x);
 
             return fallback();
+        }
+
+        
+        public async Task<bool> When(Func<T4, Task> fn)
+        {
+            if (this.value is T4 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T4, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T4 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T4, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T4 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T4, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T4 x)
+                return await fn(x);
+
+            return await fallback();
         }
         public bool When(Action<T5> action)
         {
@@ -1008,6 +1669,46 @@ namespace Aikixd.FunctionalExtensions
             return fallback();
         }
 
+        
+        public async Task<bool> When(Func<T5, Task> fn)
+        {
+            if (this.value is T5 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T5, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T5 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T5, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T5 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T5, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T5 x)
+                return await fn(x);
+
+            return await fallback();
+        }
+
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5)
         {  
             switch (this.value)
@@ -1032,6 +1733,36 @@ namespace Aikixd.FunctionalExtensions
                 case T3 x: action3(x); break;
                 case T4 x: action4(x); break;
                 case T5 x: action5(x); break;
+         
+                default: throw new InvalidUnionStateException();
+            }
+        }
+
+        
+        public async Task<TResult> Match<TResult>(Func<T1, Task<TResult>> fn1, Func<T2, Task<TResult>> fn2, Func<T3, Task<TResult>> fn3, Func<T4, Task<TResult>> fn4, Func<T5, Task<TResult>> fn5)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: return await fn1(x);
+                case T2 x: return await fn2(x);
+                case T3 x: return await fn3(x);
+                case T4 x: return await fn4(x);
+                case T5 x: return await fn5(x);
+         
+            }
+            
+            throw new InvalidUnionStateException();
+        }
+
+        public async Task Match(Func<T1, Task> fn1, Func<T2, Task> fn2, Func<T3, Task> fn3, Func<T4, Task> fn4, Func<T5, Task> fn5)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: await fn1(x); break;
+                case T2 x: await fn2(x); break;
+                case T3 x: await fn3(x); break;
+                case T4 x: await fn4(x); break;
+                case T5 x: await fn5(x); break;
          
                 default: throw new InvalidUnionStateException();
             }
@@ -1173,6 +1904,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T1, Task> fn)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T1, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T2> action)
         {
             if (this.value is T2 x)
@@ -1210,6 +1981,46 @@ namespace Aikixd.FunctionalExtensions
                 return fn(x);
 
             return fallback();
+        }
+
+        
+        public async Task<bool> When(Func<T2, Task> fn)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T2, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return await fallback();
         }
         public bool When(Action<T3> action)
         {
@@ -1249,6 +2060,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T3, Task> fn)
+        {
+            if (this.value is T3 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T3, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T3 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T3, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T3 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T3, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T3 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T4> action)
         {
             if (this.value is T4 x)
@@ -1287,6 +2138,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T4, Task> fn)
+        {
+            if (this.value is T4 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T4, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T4 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T4, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T4 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T4, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T4 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T5> action)
         {
             if (this.value is T5 x)
@@ -1324,6 +2215,46 @@ namespace Aikixd.FunctionalExtensions
                 return fn(x);
 
             return fallback();
+        }
+
+        
+        public async Task<bool> When(Func<T5, Task> fn)
+        {
+            if (this.value is T5 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T5, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T5 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T5, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T5 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T5, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T5 x)
+                return await fn(x);
+
+            return await fallback();
         }
         public bool When(Action<T6> action)
         {
@@ -1364,6 +2295,46 @@ namespace Aikixd.FunctionalExtensions
             return fallback();
         }
 
+        
+        public async Task<bool> When(Func<T6, Task> fn)
+        {
+            if (this.value is T6 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T6, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T6 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T6, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T6 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T6, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T6 x)
+                return await fn(x);
+
+            return await fallback();
+        }
+
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5, Func<T6, TResult> fn6)
         {  
             switch (this.value)
@@ -1390,6 +2361,38 @@ namespace Aikixd.FunctionalExtensions
                 case T4 x: action4(x); break;
                 case T5 x: action5(x); break;
                 case T6 x: action6(x); break;
+         
+                default: throw new InvalidUnionStateException();
+            }
+        }
+
+        
+        public async Task<TResult> Match<TResult>(Func<T1, Task<TResult>> fn1, Func<T2, Task<TResult>> fn2, Func<T3, Task<TResult>> fn3, Func<T4, Task<TResult>> fn4, Func<T5, Task<TResult>> fn5, Func<T6, Task<TResult>> fn6)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: return await fn1(x);
+                case T2 x: return await fn2(x);
+                case T3 x: return await fn3(x);
+                case T4 x: return await fn4(x);
+                case T5 x: return await fn5(x);
+                case T6 x: return await fn6(x);
+         
+            }
+            
+            throw new InvalidUnionStateException();
+        }
+
+        public async Task Match(Func<T1, Task> fn1, Func<T2, Task> fn2, Func<T3, Task> fn3, Func<T4, Task> fn4, Func<T5, Task> fn5, Func<T6, Task> fn6)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: await fn1(x); break;
+                case T2 x: await fn2(x); break;
+                case T3 x: await fn3(x); break;
+                case T4 x: await fn4(x); break;
+                case T5 x: await fn5(x); break;
+                case T6 x: await fn6(x); break;
          
                 default: throw new InvalidUnionStateException();
             }
@@ -1541,6 +2544,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T1, Task> fn)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T1, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T1 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T1, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T1 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T2> action)
         {
             if (this.value is T2 x)
@@ -1578,6 +2621,46 @@ namespace Aikixd.FunctionalExtensions
                 return fn(x);
 
             return fallback();
+        }
+
+        
+        public async Task<bool> When(Func<T2, Task> fn)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T2, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T2 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T2, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T2 x)
+                return await fn(x);
+
+            return await fallback();
         }
         public bool When(Action<T3> action)
         {
@@ -1617,6 +2700,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T3, Task> fn)
+        {
+            if (this.value is T3 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T3, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T3 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T3, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T3 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T3, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T3 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T4> action)
         {
             if (this.value is T4 x)
@@ -1654,6 +2777,46 @@ namespace Aikixd.FunctionalExtensions
                 return fn(x);
 
             return fallback();
+        }
+
+        
+        public async Task<bool> When(Func<T4, Task> fn)
+        {
+            if (this.value is T4 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T4, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T4 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T4, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T4 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T4, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T4 x)
+                return await fn(x);
+
+            return await fallback();
         }
         public bool When(Action<T5> action)
         {
@@ -1693,6 +2856,46 @@ namespace Aikixd.FunctionalExtensions
 
             return fallback();
         }
+
+        
+        public async Task<bool> When(Func<T5, Task> fn)
+        {
+            if (this.value is T5 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T5, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T5 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T5, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T5 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T5, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T5 x)
+                return await fn(x);
+
+            return await fallback();
+        }
         public bool When(Action<T6> action)
         {
             if (this.value is T6 x)
@@ -1730,6 +2933,46 @@ namespace Aikixd.FunctionalExtensions
                 return fn(x);
 
             return fallback();
+        }
+
+        
+        public async Task<bool> When(Func<T6, Task> fn)
+        {
+            if (this.value is T6 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T6, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T6 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T6, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T6 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T6, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T6 x)
+                return await fn(x);
+
+            return await fallback();
         }
         public bool When(Action<T7> action)
         {
@@ -1770,6 +3013,46 @@ namespace Aikixd.FunctionalExtensions
             return fallback();
         }
 
+        
+        public async Task<bool> When(Func<T7, Task> fn)
+        {
+            if (this.value is T7 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<T7, Task> fn, Func<Task> fallback)
+        {
+            if (this.value is T7 x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T7, Task<TResult>> fn, TResult @default)
+        {
+            if (this.value is T7 x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<T7, Task<TResult>> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is T7 x)
+                return await fn(x);
+
+            return await fallback();
+        }
+
         public TResult Match<TResult>(Func<T1, TResult> fn1, Func<T2, TResult> fn2, Func<T3, TResult> fn3, Func<T4, TResult> fn4, Func<T5, TResult> fn5, Func<T6, TResult> fn6, Func<T7, TResult> fn7)
         {  
             switch (this.value)
@@ -1798,6 +3081,40 @@ namespace Aikixd.FunctionalExtensions
                 case T5 x: action5(x); break;
                 case T6 x: action6(x); break;
                 case T7 x: action7(x); break;
+         
+                default: throw new InvalidUnionStateException();
+            }
+        }
+
+        
+        public async Task<TResult> Match<TResult>(Func<T1, Task<TResult>> fn1, Func<T2, Task<TResult>> fn2, Func<T3, Task<TResult>> fn3, Func<T4, Task<TResult>> fn4, Func<T5, Task<TResult>> fn5, Func<T6, Task<TResult>> fn6, Func<T7, Task<TResult>> fn7)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: return await fn1(x);
+                case T2 x: return await fn2(x);
+                case T3 x: return await fn3(x);
+                case T4 x: return await fn4(x);
+                case T5 x: return await fn5(x);
+                case T6 x: return await fn6(x);
+                case T7 x: return await fn7(x);
+         
+            }
+            
+            throw new InvalidUnionStateException();
+        }
+
+        public async Task Match(Func<T1, Task> fn1, Func<T2, Task> fn2, Func<T3, Task> fn3, Func<T4, Task> fn4, Func<T5, Task> fn5, Func<T6, Task> fn6, Func<T7, Task> fn7)
+        {  
+            switch (this.value)
+            {
+		        case T1 x: await fn1(x); break;
+                case T2 x: await fn2(x); break;
+                case T3 x: await fn3(x); break;
+                case T4 x: await fn4(x); break;
+                case T5 x: await fn5(x); break;
+                case T6 x: await fn6(x); break;
+                case T7 x: await fn7(x); break;
          
                 default: throw new InvalidUnionStateException();
             }

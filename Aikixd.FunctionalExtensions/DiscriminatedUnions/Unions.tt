@@ -5,6 +5,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
 using System;
+using System.Threading.Tasks;
 using Aikixd.FunctionalExtensions.DiscriminatedUnions;
 
 namespace Aikixd.FunctionalExtensions
@@ -133,6 +134,47 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
 
             return fallback();
         }
+
+        <# // async #>
+
+        public async Task<bool> When(Func<#= "<" + curTypeArg + ", Task>" #> fn)
+        {
+            if (this.value is <#= curTypeArg #> x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> When(Func<#= "<" + curTypeArg + ", Task>" #> fn, Func<Task> fallback)
+        {
+            if (this.value is <#= curTypeArg #> x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> When<TResult>(Func<#= "<" + curTypeArg + ", Task<TResult>>" #> fn, TResult @default)
+        {
+            if (this.value is <#= curTypeArg #> x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> When<TResult>(Func<#= "<" + curTypeArg + ", Task<TResult>>" #> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is <#= argNames[i - 1] #> x)
+                return await fn(x);
+
+            return await fallback();
+        }
 <#
     }
 
@@ -173,6 +215,49 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
         for (var i = 1; i <= argNames.Length; i += 1)
         {
         #>        case <#= argNames[i - 1] #> x: action<#= i #>(x); break;
+        <#
+        }
+        #> 
+                default: throw new InvalidUnionStateException();
+            }
+        }
+
+        <# // async #>
+
+        public async Task<TResult> Match<TResult>(<#= 
+            argNames
+            .Select((x, i) => new { str = x, i = i + 1 })
+            .Select(x => "Func<" + x.str + ", Task<TResult>> fn" + x.i)
+            .Aggregate((aggr, cur) => aggr + ", " + cur)
+        #>)
+        {  
+            switch (this.value)
+            {
+		<#
+        for (var i = 1; i <= argNames.Length; i += 1)
+        {
+        #>        case <#= argNames[i - 1] #> x: return await fn<#= i #>(x);
+        <#
+        }
+        #> 
+            }
+            
+            throw new InvalidUnionStateException();
+        }
+
+        public async Task Match(<#= 
+            argNames
+            .Select((x, i) => new { str = x, i = i + 1 })
+            .Select(x => "Func<" + x.str + ", Task> fn" + x.i)
+            .Aggregate((aggr, cur) => aggr + ", " + cur)
+        #>)
+        {  
+            switch (this.value)
+            {
+		<#
+        for (var i = 1; i <= argNames.Length; i += 1)
+        {
+        #>        case <#= argNames[i - 1] #> x: await fn<#= i #>(x); break;
         <#
         }
         #> 
