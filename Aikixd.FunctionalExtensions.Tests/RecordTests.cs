@@ -1,4 +1,8 @@
+using Aikixd.FunctionalExtensions.Records;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,6 +12,16 @@ namespace Aikixd.FunctionalExtensions.Tests
     [TestClass]
     public class RecordTests
     {
+        class PrivateRecord : Record<PrivateRecord>
+        {
+            public string Value { get; }
+
+            public PrivateRecord(string value)
+            {
+                this.Value = value;
+            }
+        }
+
         public class EqualityClass : IEqualityComparer<EqualityClass>
         {
             public int I { get; set; }
@@ -301,6 +315,22 @@ namespace Aikixd.FunctionalExtensions.Tests
             Assert.AreNotEqual(r1.Rec, r2.Rec);
 
             Assert.AreEqual(10, r2.Rec.One);
+        }
+
+        [TestMethod]
+        public void Record_ExternalPrivate()
+        {
+            try
+            {
+                var record = new PrivateRecord("abc");
+
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsInstanceOfType(e, typeof(TypeInitializationException));
+                Assert.IsInstanceOfType(e.InnerException, typeof(RecordVisibilityException));
+            }
         }
     }
 }

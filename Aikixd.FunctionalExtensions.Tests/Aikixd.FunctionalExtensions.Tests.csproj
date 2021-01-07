@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Aikixd.FunctionalExtensions.Tests.ExternalLib\Aikixd.FunctionalExtensions.Tests.ExternalLib.csproj" />
     <ProjectReference Include="..\Aikixd.FunctionalExtensions\Aikixd.FunctionalExtensions.csproj" />
   </ItemGroup>
 

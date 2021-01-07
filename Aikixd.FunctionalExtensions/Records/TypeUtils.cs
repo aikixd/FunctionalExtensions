@@ -1,4 +1,5 @@
 ﻿using Aikixd.FunctionalExtensions.Utils;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,6 +10,7 @@ using System.Text;
 
 namespace Aikixd.FunctionalExtensions.Records
 {
+
     internal class TypeUtils<T>
         where T : class
     {
@@ -32,6 +34,11 @@ namespace Aikixd.FunctionalExtensions.Records
                     toString,
                     recordCopy,
                     recordFieldSetMap);
+            }
+
+            catch (TypeLoadException e) when (e.Message.StartsWith("Access is denied"))
+            {
+                throw new RecordVisibilityException(typeof(T), e);
             }
 
             catch (Exception e)
