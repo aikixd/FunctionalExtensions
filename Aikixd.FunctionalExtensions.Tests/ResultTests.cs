@@ -4,11 +4,18 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
+namespace System.Runtime.CompilerServices
+{
+    internal static class IsExternalInit { }
+}
+
 namespace Aikixd.FunctionalExtensions.Tests
 {
     [TestClass]
     public class ResultTests
     {
+        record AppError(string Message);
+
         [TestMethod]
         public void ResultUnion_Casts()
         {
@@ -37,13 +44,13 @@ namespace Aikixd.FunctionalExtensions.Tests
             var error = new Result<int>(new Error<int>(1));
 
             var resultOk =
-                ok.Bind(() => new Result<int>(new Ok()));
+                ok.Then(() => new Result<int>(new Ok()));
 
             var resultError =
-                error.Bind(() => new Result<int>(new Error<int>(2)));
+                error.Then(() => new Result<int>(new Error<int>(2)));
 
             var resultError2 =
-                ok.Bind(() => new Result<int>(new Error<int>(2)));
+                ok.Then(() => new Result<int>(new Error<int>(2)));
 
             Assert.AreEqual(new Result<int>(new Ok()), resultOk);
             Assert.AreEqual(new Result<int>(new Error<int>(1)), resultError);
@@ -57,13 +64,13 @@ namespace Aikixd.FunctionalExtensions.Tests
             var error = new Result<int>(new Error<int>(1));
 
             var resultOk =
-                await ok.Bind(async () => {
+                await ok.ThenAsync(async () => {
                     await Task.Delay(50);
                     return new Result<int>(new Ok()); 
                 });
 
             var resultError =
-                await error.Bind(async () =>
+                await error.ThenAsync(async () =>
                 {
                     await Task.Delay(50);
                     return new Result<int>(new Error<int>(2));
@@ -74,14 +81,90 @@ namespace Aikixd.FunctionalExtensions.Tests
         }
 
         [TestMethod]
-        public void ResultUnion_BindConvert()
+        public async Task ResultUnion_BindAsync_Ok_Sync_Async_Async()
         {
-            var error = new Result<int>(new Error<int>(1));
+            Result<string, AppError> result = Ok.New("A");
 
-            var resultError =
-                error.Bind(() => new Result<string>(new Error<string>("one")), x => x.ToString());
+            var r1 =
+                await result
+                    .ThenAsync((ok) => Task.FromResult(new Result<string, AppError>(ok + "B")))
+                    .ThenAsync(async (ok) => {
+                        await Task.Delay(1);
+                        return new Result<string, AppError>(Ok.New(ok + "C"));
+                    });
 
-            Assert.AreEqual(new Result<string>(new Error<string>("1")), resultError);
+            Assert.AreEqual(new Result<string, AppError>(Ok.New("ABC")), r1);
+        }
+
+        [TestMethod]
+        public async Task ResultUnion_BindAsync_Ok_Sync_Async_Sync()
+        {
+            Result<string, AppError> result = Ok.New("A");
+
+            var r1 =
+                await result
+                    .ThenAsync((ok) => Task.FromResult(new Result<string, AppError>(ok + "B")))
+                    .Then((ok) => new Result<string, AppError>(Ok.New(ok + "C")));
+
+            Assert.AreEqual(new Result<string, AppError>(Ok.New("ABC")), r1);
+        }
+
+        [TestMethod]
+        public async Task ResultUnion_BindAsync_Error_Sync_Async_Async()
+        {
+            Result<string, string> result = Error.New("A");
+
+            var r1 =
+                await result
+                    .ThenAsync((ok) => Task.FromResult(new Result<string, string>(Ok.New(ok + "B"))))
+                    .ThenAsync(async (ok) => {
+                        await Task.Delay(1);
+                        return new Result<string, string>(Ok.New(ok + "C"));
+                    });
+
+            Assert.AreEqual(new Result<string, string>(Error.New("A")), r1);
+        }
+
+        [TestMethod]
+        public async Task ResultUnion_BindAsync_Error_Sync_Async_Sync()
+        {
+            Result<string, string> result = Error.New("A");
+
+            var r1 =
+                await result
+                    .ThenAsync((ok) => Task.FromResult(new Result<string, string>(Ok.New(ok + "B"))))
+                    .Then((ok) => new Result<string, string>(Ok.New(ok + "C")));
+
+            Assert.AreEqual(new Result<string, string>(Error.New("A")), r1);
+        }
+
+        [TestMethod]
+        public async Task ResultUnion_BindAsync_Error_Sync_Async_Async_Intermediate()
+        {
+            Result<string, string> result = Ok.New("A");
+
+            var r1 =
+                await result
+                    .ThenAsync((ok) => Task.FromResult(new Result<string, string>(Error.New(ok + "B"))))
+                    .ThenAsync(async (ok) => {
+                        await Task.Delay(1);
+                        return new Result<string, string>(Ok.New(ok + "C"));
+                    });
+
+            Assert.AreEqual(new Result<string, string>(Error.New("AB")), r1);
+        }
+
+        [TestMethod]
+        public async Task ResultUnion_BindAsync_Error_Sync_Async_Sync_Intermediate()
+        {
+            Result<string, string> result = Ok.New("A");
+
+            var r1 =
+                await result
+                    .ThenAsync((ok) => Task.FromResult(new Result<string, string>(Error.New(ok + "B"))))
+                    .Then((ok) => new Result<string, string>(Ok.New(ok + "C")));
+
+            Assert.AreEqual(new Result<string, string>(Error.New("AB")), r1);
         }
 
         [TestMethod]
@@ -91,13 +174,13 @@ namespace Aikixd.FunctionalExtensions.Tests
             var error = new Result<string, int>(new Error<int>(1));
 
             var resultOk =
-                ok.Bind(x => new Result<string, int>(new Ok<string>(x.ToString())));
+                ok.Then(x => new Result<string, int>(new Ok<string>(x.ToString())));
 
             var resultError =
-                error.Bind(x => new Result<string, int>(new Error<int>(2)));
+                error.Then(x => new Result<string, int>(new Error<int>(2)));
 
             var resultError2 =
-                ok.Bind(x => new Result<string, int>(new Error<int>(2)));
+                ok.Then(x => new Result<string, int>(new Error<int>(2)));
 
             Assert.AreEqual(new Result<string, int>(new Ok<string>("123")), resultOk);
             Assert.AreEqual(new Result<string, int>(new Error<int>(1)), resultError);
@@ -110,20 +193,9 @@ namespace Aikixd.FunctionalExtensions.Tests
             var ok = new Result<int, int>(new Ok<int>(123));
 
             var resultOk =
-                ok.Bind(x => new Result<int>(new Ok()));
+                ok.Then(x => new Result<int>(new Ok()));
                 
             Assert.AreEqual(new Result<int>(new Ok()), resultOk);
-        }
-
-        [TestMethod]
-        public void ResultUnion_Generic_BindConvert()
-        {
-            var error = new Result<string,int>(new Error<int>(1));
-
-            var resultError =
-                error.Bind(x => new Result<string, string>(new Error<string>("one")), x => x.ToString());
-
-            Assert.AreEqual(new Result<string, string>(new Error<string>("1")), resultError);
         }
 
         [TestMethod]

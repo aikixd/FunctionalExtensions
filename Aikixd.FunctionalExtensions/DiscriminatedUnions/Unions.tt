@@ -96,6 +96,64 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
     {
         var curTypeArg = argNames[i - 1];
 #>
+
+        public TResult When<TResult>(Func<#= "<" + curTypeArg + ", TResult>" #> fn, TResult @default)
+        {
+            if (this.value is <#= curTypeArg #> x)
+                return fn(x);
+
+            return @default;
+        }
+
+        public TResult When<TResult>(Func<#= "<" + curTypeArg + ", TResult>" #> fn, Func<TResult> fallback)
+        {
+            if (this.value is <#= argNames[i - 1] #> x)
+                return fn(x);
+
+            return fallback();
+        }
+
+        <# // async #>
+
+        public async Task<bool> WhenAsync(Func<#= "<" + curTypeArg + ", Task>" #> fn)
+        {
+            if (this.value is <#= curTypeArg #> x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<bool> WhenAsync(Func<#= "<" + curTypeArg + ", Task>" #> fn, Func<Task> fallback)
+        {
+            if (this.value is <#= curTypeArg #> x)
+            {
+                await fn(x);
+                return true;
+            }
+
+            await fallback();
+            return false;
+        }
+
+        public async Task<TResult> WhenAsync<TResult>(Func<#= "<" + curTypeArg + ", Task<TResult>>" #> fn, TResult @default)
+        {
+            if (this.value is <#= curTypeArg #> x)
+                return await fn(x);
+
+            return @default;
+        }
+
+        public async Task<TResult> WhenAsync<TResult>(Func<#= "<" + curTypeArg + ", Task<TResult>>" #> fn, Func<Task<TResult>> fallback)
+        {
+            if (this.value is <#= argNames[i - 1] #> x)
+                return await fn(x);
+
+            return await fallback();
+        }
+
         public bool When(Action<#= "<" + curTypeArg + ">" #> action)
         {
             if (this.value is <#= curTypeArg #> x)
@@ -117,63 +175,6 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
 
             fallback();
             return false;
-        }
-
-        public TResult When<TResult>(Func<#= "<" + curTypeArg + ", TResult>" #> fn, TResult @default)
-        {
-            if (this.value is <#= curTypeArg #> x)
-                return fn(x);
-
-            return @default;
-        }
-
-        public TResult When<TResult>(Func<#= "<" + curTypeArg + ", TResult>" #> fn, Func<TResult> fallback)
-        {
-            if (this.value is <#= argNames[i - 1] #> x)
-                return fn(x);
-
-            return fallback();
-        }
-
-        <# // async #>
-
-        public async Task<bool> When(Func<#= "<" + curTypeArg + ", Task>" #> fn)
-        {
-            if (this.value is <#= curTypeArg #> x)
-            {
-                await fn(x);
-                return true;
-            }
-
-            return false;
-        }
-
-        public async Task<bool> When(Func<#= "<" + curTypeArg + ", Task>" #> fn, Func<Task> fallback)
-        {
-            if (this.value is <#= curTypeArg #> x)
-            {
-                await fn(x);
-                return true;
-            }
-
-            await fallback();
-            return false;
-        }
-
-        public async Task<TResult> When<TResult>(Func<#= "<" + curTypeArg + ", Task<TResult>>" #> fn, TResult @default)
-        {
-            if (this.value is <#= curTypeArg #> x)
-                return await fn(x);
-
-            return @default;
-        }
-
-        public async Task<TResult> When<TResult>(Func<#= "<" + curTypeArg + ", Task<TResult>>" #> fn, Func<Task<TResult>> fallback)
-        {
-            if (this.value is <#= argNames[i - 1] #> x)
-                return await fn(x);
-
-            return await fallback();
         }
 <#
     }
@@ -224,7 +225,7 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
 
         <# // async #>
 
-        public async Task<TResult> Match<TResult>(<#= 
+        public async Task<TResult> MatchAsync<TResult>(<#= 
             argNames
             .Select((x, i) => new { str = x, i = i + 1 })
             .Select(x => "Func<" + x.str + ", Task<TResult>> fn" + x.i)
@@ -245,7 +246,7 @@ for (int argumentCount = 1; argumentCount <= 7; argumentCount += 1)
             throw new InvalidUnionStateException();
         }
 
-        public async Task Match(<#= 
+        public async Task MatchAsyncVoid(<#= 
             argNames
             .Select((x, i) => new { str = x, i = i + 1 })
             .Select(x => "Func<" + x.str + ", Task> fn" + x.i)

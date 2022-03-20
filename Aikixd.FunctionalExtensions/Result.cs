@@ -32,7 +32,14 @@ namespace Aikixd.FunctionalExtensions
         }
     }
 
-    public class Ok : Record<Ok> { }
+    public class Ok : Record<Ok> {
+        public static Ok<T> New<T>(T value) => new Ok<T>(value);
+    }
+
+    public static class Error
+    {
+        public static Error<T> New<T>(T value) => new Error<T>(value);
+    }
 
     public class Error<T> : Record<Error<T>>
     {
@@ -60,7 +67,7 @@ namespace Aikixd.FunctionalExtensions
 
         public Result(Error<TError> value) : base(value) { }
 
-        public Result<TError> Bind(Func<Result<TError>> fn)
+        public Result<TError> Then(Func<Result<TError>> fn)
         {
             return
                 this.Match(
@@ -68,32 +75,12 @@ namespace Aikixd.FunctionalExtensions
                     error => this);
         }
 
-        public Result<TOtherError> Bind<TOtherError>(
-            Func<Result<TOtherError>> fn,
-            Func<TError, TOtherError> convert)
-        {
-            return
-                this.Match(
-                    ok => fn(),
-                    error => convert(error.Value));
-        }
-
-        public Task<Result<TError>> Bind(Func<Task<Result<TError>>> fn)
+        public Task<Result<TError>> ThenAsync(Func<Task<Result<TError>>> fn)
         {
             return
                 this.Match(
                     ok => fn(),
                     error => Task.FromResult(this));
-        }
-
-        public Task<Result<TOtherError>> Bind<TOtherError>(
-            Func<Task<Result<TOtherError>>> fn,
-            Func<TError, Task<TOtherError>> convert)
-        {
-            return
-                this.Match(
-                    ok => fn(),
-                    async error => (Result<TOtherError>) await convert(error.Value));
         }
 
         public Result<TOtherError> Select<TOtherError>(
@@ -127,7 +114,7 @@ namespace Aikixd.FunctionalExtensions
 
         public Result(Error<TError> value) : base(value) { }
 
-        public Result<U, TError> Bind<U>(Func<T, Result<U, TError>> fn)
+        public Result<U, TError> Then<U>(Func<T, Result<U, TError>> fn)
         {
             return
                 this.Match(
@@ -135,7 +122,7 @@ namespace Aikixd.FunctionalExtensions
                     error => error);
         }
 
-        public Result<TError> Bind(Func<T, Result<TError>> fn)
+        public Result<TError> Then(Func<T, Result<TError>> fn)
         {
             return
                 this.Match(
@@ -143,39 +130,21 @@ namespace Aikixd.FunctionalExtensions
                     error => error);
         }
 
-        public Result<U, UError> Bind<U, UError>(Func<T, Result<U, UError>> fn, Func<TError, UError> convert)
+        public Task<Result<U, TError>> ThenAsync<U>(Func<T, Task<Result<U, TError>>> fn)
         {
             return
                 this.Match(
                     ok => fn(ok.Value),
-                    error => convert(error.Value));
+                    error => Task.FromResult((Result<U, TError>)error));
         }
 
-        public Task<Result<U, TError>> Bind<U>(Func<T, Task<Result<U, TError>>> fn)
+        public Task<Result<TError>> ThenAsync(Func<T, Task<Result<TError>>> fn)
         {
             return
+
                 this.Match(
                     ok => fn(ok.Value),
-                    async error => (Result<U, TError>) await Task.FromResult(error));
-        }
-
-        public Task<Result<TError>> Bind(Func<T, Task<Result<TError>>> fn)
-        {
-            return
-                
-                this.Match(
-                    ok =>  fn(ok.Value),
-                    async error => (Result<TError>) await Task.FromResult(error));
-        }
-
-        public Task<Result<U, UError>> Bind<U, UError>(
-            Func<T, Task<Result<U, UError>>> fn,
-            Func<TError, Task<UError>> convert)
-        {
-            return
-                this.Match(
-                    ok => fn(ok.Value),
-                    async error => (Result<U, UError>) await convert(error.Value));
+                    error => Task.FromResult((Result<TError>)error));
         }
 
         public Result<TOtherResult, TOtherError> Select<TOtherResult, TOtherError>(
@@ -206,5 +175,48 @@ namespace Aikixd.FunctionalExtensions
 
         public static implicit operator Result<T, TError>(TError error)
             => new Result<T, TError>(new Error<TError>(error));
+    }
+
+    public static class AsyncResultBindCompositions
+    {
+        public static async Task<Result<U, TError>> ThenAsync<T, TError, U>(this Task<Result<T, TError>> asyncResult, Func<T, Task<Result<U, TError>>> fn)
+        {
+            return await (await asyncResult).ThenAsync(fn);
+        }
+
+        public static async Task<Result<U, TError>> Then<T, TError, U>(this Task<Result<T, TError>> asyncResult, Func<T, Result<U, TError>> fn)
+        {
+            return (await asyncResult).Then(fn);
+        }
+
+        public static async Task<Result<TOtherError>> Select<TError, TOtherError>(
+            this Task<Result<TError>> error,
+            Func<TError, TOtherError> map)
+        {
+
+            return (await error).Match(
+                ok => new Result<TOtherError>(ok),
+                err => new Result<TOtherError>(new Error<TOtherError>(map(err.Value)))
+            );
+        }
+
+        public static async Task<Result<TOther, TOtherError>> Select<T, TError, TOther, TOtherError>(
+            this Task<Result<T, TError>> error,
+            Func<T, TOther> mapOk,
+            Func<TError, TOtherError> mapErr)
+        {
+
+            return (await error).Match(
+                ok => new Result<TOther, TOtherError>(new Ok<TOther>(mapOk(ok.Value))),
+                error => new Result<TOther, TOtherError>(new Error<TOtherError>(mapErr(error.Value)))
+            );
+        }
+
+        public static async Task<Result<TOther, TError>> Select<T, TError, TOther>(
+            this Task<Result<T, TError>> error,
+            Func<T, TOther> map)
+        {
+            return (await error).Select(map, x => x);
+        }
     }
 } 
